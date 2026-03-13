@@ -2,7 +2,7 @@
 
     <section id="hero" class="relative w-full h-screen flex items-center justify-center overflow-hidden bg-black">
         <video autoplay loop muted playsinline class="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover opacity-50">
-            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/6023202/6023202-uhd_2560_1440_25fps.mp4" type="video/mp4" />
         </video>
         <div class="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80 z-10"></div>
 
@@ -15,6 +15,10 @@
             </h2>
             <a href="#reserva" class="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-10 rounded-full text-lg transition shadow-[0_0_20px_rgba(16,185,129,0.4)] transform hover:scale-105">
                 Agendar Mi Primera Clase
+            </a>
+
+            <a href="/clientes/login" class="inline-block bg-black/25 ml-3 mt-3 sm:mt-0 max-w-5-xl hover:bg-white text-white hover:text-black font-bold py-4 px-10 rounded-full text-lg transition transform hover:scale-105">
+                Ya Soy Cliente
             </a>
         </div>
     </section>
