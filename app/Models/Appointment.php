@@ -12,7 +12,9 @@ class Appointment extends Model
         'user_id',
         'date',
         'time_slot',
-        'status', // scheduled, cancelled, completed
+        'status',
+        'check_in_status',
+        'checked_in_by'
     ];
 
     protected function casts(): array
@@ -30,5 +32,10 @@ class Appointment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function checkedInBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'checked_in_by');
     }
 }

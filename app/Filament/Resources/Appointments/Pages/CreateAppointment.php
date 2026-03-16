@@ -73,6 +73,8 @@ class CreateAppointment extends CreateRecord
                 'is_special' => true,
             ]);
 
+            $appointment->update(['check_in_status' => 'cobrar_al_llegar']);
+
             Notification::make()
                 ->title('¡ATENCIÓN: Cliente sin créditos!')
                 ->body('El cliente ' . $user->name . ' NO tenía saldo de créditos. La cita está confirmada, pero debes COBRARLE en mostrador al llegar.')

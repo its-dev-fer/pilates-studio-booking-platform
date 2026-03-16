@@ -27,7 +27,7 @@ class CreateAppointment extends CreateRecord
             ->sum('balance');
 
         if ($activeCredits > 0) {
-            return new HtmlString("<span class='text-emerald-600 font-bold'>Tienes {$activeCredits} créditos disponibles en esta sucursal.</span> Se descontará 1 al agendar.");
+            return new HtmlString("<span class='text-primary font-bold'>Tienes {$activeCredits} créditos disponibles en esta sucursal.</span> Se descontará 1 al agendar.");
         }
 
         return new HtmlString("<span class='text-red-600 font-bold'>No tienes créditos activos en esta sucursal.</span> <a href='/comprar-creditos' class='underline hover:text-red-800'>Compra un paquete aquí</a> antes de intentar agendar.");

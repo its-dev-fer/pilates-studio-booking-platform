@@ -30,17 +30,17 @@ class AppointmentForm
                     DatePicker::make('date')
                         ->label('Fecha')
                         ->required()
-                        ->minDate(now())
-                        ->maxDate(now()->endOfMonth())
-                        ->live() // Hace que reaccione al vuelo
-                        ->afterStateUpdated(fn (callable $set) => $set('time_slot', null)), // Resetea la hora si cambian la fecha
+                        ->minDate(fn (string $operation) => $operation === 'create' ? today() : null)
+                        ->maxDate(fn (string $operation) => $operation === 'create' ? today()->endOfMonth() : null)
+                        ->live()
+                        ->afterStateUpdated(fn (callable $set) => $set('time_slot', null)),// Resetea la hora si cambian la fecha
 
                     Select::make('time_slot')
                         ->label('Horario Disponible')
                         ->required()
                         ->searchable()
                         ->helperText('Selecciona la fecha primero. Solo se muestran horarios disponibles.')
-                        ->options(function (callable $get) {
+                        ->options(function (callable $get, ?Appointment $record) {
                             $dateStr = $get('date');
                             if (!$dateStr) {
                                 return [];
@@ -50,12 +50,15 @@ class AppointmentForm
                             $date = \Carbon\Carbon::parse($dateStr);
                             $today = now();
 
-                            // 1. Validar límite de citas por día en la sucursal
-                            $appointments = Appointment::where('tenant_id', $tenant->id)
+                            $query = Appointment::where('tenant_id', $tenant->id)
                                 ->whereDate('date', $date->format('Y-m-d'))
-                                ->where('status', 'scheduled')
-                                ->get();
+                                ->where('status', 'scheduled');
 
+                            if ($record) {
+                                $query->where('id', '!=', $record->id);
+                            }
+
+                            $appointments = $query->get();
                             if ($appointments->count() >= $tenant->max_appointments_per_day) {
                                 return []; // Capacidad máxima alcanzada
                             }
@@ -77,8 +80,12 @@ class AppointmentForm
                             while ($currentSlot->lt($closeTime)) {
                                 $timeString = $currentSlot->format('H:i');
 
-                                // Omitir horas pasadas si es hoy
-                                if ($date->isToday() && $currentSlot->copy()->setDate($date->year, $date->month, $date->day)->isPast()) {
+                                $isCurrentRecordSlot = $record
+                                    && $record->date->format('Y-m-d') === $date->format('Y-m-d')
+                                    && \Carbon\Carbon::parse($record->time_slot)->format('H:i') === $timeString;
+
+                                // Omitir horas pasadas (PERO perdonar la hora original si estamos editando)
+                                if (!$isCurrentRecordSlot && $date->isToday() && $currentSlot->copy()->setDate($date->year, $date->month, $date->day)->isPast()) {
                                     $currentSlot->addHour();
                                     continue;
                                 }
@@ -106,7 +113,16 @@ class AppointmentForm
                             'cancelled' => 'Cancelada',
                         ])
                         ->default('scheduled')
+                        ->disabled()
+                        ->helperText('Para cancelar la cita, usa el boton de cancelar en la vista de todas las citas, no cambies el estado aquí.')
                         ->required(),
+                    Select::make('check_in_status')
+                        ->label('Check In')
+                        ->disabled(! auth()->user()->hasRole('admin'))
+                        ->options([
+                            'pendiente' => 'Pendiente',
+                            'cobrar_al_llegar' => 'Cobrar Al Llegar',
+                        ])->default('pendiente')->required()->helperText('Si seleccionas "Cobrar al llegar", el cliente no podrá hacer check-in hasta que se cobre la clase. Solo usar en casos especiales.'),
                 ])->columns(2),
             ]);
     }

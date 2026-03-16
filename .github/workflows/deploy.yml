@@ -1,0 +1,82 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main # Se ejecuta cuando haces merge o commit a main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Necesario para crear tags y branches
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necesario para leer el historial y calcular SemVer
+
+      - name: Calcular nueva versión (SemVer)
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          tag_prefix: ""
+
+      - name: Configurar Node.js (Para compilar assets)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.5.0" # Puedes cambiarlo a la versión que uses (18 o 20 son comunes)
+
+      - name: Instalar NPM y Compilar Assets en GitHub
+        run: |
+          npm ci # Es como npm install pero más limpio para CI/CD
+          npm run build
+
+      - name: Crear rama Release, agregar assets y subirla
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git checkout -b release/${{ steps.tag_version.outputs.new_tag }}
+
+          # Forzamos agregar la carpeta de assets compilados (usualmente ignorada en .gitignore)
+          # Si usas Laravel Vite, la carpeta es public/build.
+          # Si usas Laravel Mix (versiones más viejas), sería public/css y public/js
+          git add public/build -f
+
+          # Hacemos el commit de los assets y subimos la rama
+          git commit -m "chore: compilar assets para versión ${{ steps.tag_version.outputs.new_tag }}"
+          git push origin release/${{ steps.tag_version.outputs.new_tag }}
+
+      - name: Despliegue en el Servidor vía SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd ${{ secrets.PROJECT_PATH }}
+
+            # 1. Bajar últimos cambios del repositorio
+            git fetch --all
+
+            # 2. Descartar cualquier cambio local sucio en el servidor antes de cambiar de rama
+            git reset --hard HEAD
+
+            # 3. Cambiarse a la nueva rama release que YA trae los assets compilados
+            git checkout release/${{ steps.tag_version.outputs.new_tag }}
+            git pull origin release/${{ steps.tag_version.outputs.new_tag }}
+
+            # 4. Instalar dependencias de PHP (composer sí está en tu server)
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+
+            # 5. Guardar la versión para Filament
+            echo "${{ steps.tag_version.outputs.new_tag }}" > version.txt
+
+            # 6. Limpiar caché de Laravel
+            php artisan optimize:clar
+
+            php artisan migrate

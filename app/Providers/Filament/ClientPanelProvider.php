@@ -30,7 +30,7 @@ class ClientPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Olive,
             ])
-            ->brandName('Portal de Clientes')
+            ->brandName('Acceso Clientes')
             ->tenant(Tenant::class, slugAttribute: 'slug') // Multitenancy también en portal clientes
             ->discoverResources(in: app_path('Filament/Client/Resources'), for: 'App\Filament\Client\Resources')
             ->discoverPages(in: app_path('Filament/Client/Pages'), for: 'App\Filament\Client\Pages')

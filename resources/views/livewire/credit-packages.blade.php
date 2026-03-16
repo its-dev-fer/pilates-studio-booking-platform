@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mt-9 mx-auto mb-8">
-        <a href="/clientes" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-emerald-600 transition-colors">
+        <a href="/clientes" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary transition-colors">
             <svg class="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Volver a mi Panel
         </a>
@@ -36,16 +36,16 @@
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900 text-center mb-4">{{ $package->name }}</h3>
                     <div class="text-center mb-6">
-                        <span class="text-5xl font-extrabold text-emerald-600">${{ number_format($package->price, 2) }}</span>
+                        <span class="text-5xl font-extrabold text-primary">${{ number_format($package->price, 2) }}</span>
                         <span class="text-gray-500 font-medium text-lg">MXN</span>
                     </div>
                     <ul class="space-y-4 mb-8">
                         <li class="flex items-center text-gray-600">
-                            <svg class="w-6 h-6 text-emerald-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <svg class="w-6 h-6 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             <strong>{{ $package->credits_amount }}</strong>&nbsp;Créditos (Clases)
                         </li>
                         <li class="flex items-center text-gray-600">
-                            <svg class="w-6 h-6 text-emerald-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <svg class="w-6 h-6 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             Vigencia de 30 días
                         </li>
                     </ul>

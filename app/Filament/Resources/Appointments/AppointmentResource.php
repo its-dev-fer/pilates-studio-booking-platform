@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class AppointmentResource extends Resource
 {
@@ -43,6 +44,30 @@ class AppointmentResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return AppointmentForm::configure($schema);
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        $user = auth()->user();
+
+        // 1. Si es Administrador, tiene poder absoluto. Puede editar lo que sea.
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        // 2. Si es Empleado, verificamos si el cliente ya llegó
+        if ($record->check_in_status === 'cliente_llego' || $record->status === 'completed') {
+            return false;
+        }
+
+        // 3. Verificamos si la fecha y hora de la cita ya pasaron
+        $appointmentTime = \Carbon\Carbon::parse($record->date->format('Y-m-d') . ' ' . $record->time_slot);
+        if ($appointmentTime->isPast()) {
+            return false;
+        }
+
+        // Si sobrevive a los filtros, el empleado puede editar
+        return true;
     }
 
     public static function table(Table $table): Table
