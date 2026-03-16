@@ -74,7 +74,7 @@ class DashboardPanelProvider extends PanelProvider
                     } else {
                         return new HtmlString('
                             <div class="text-center text-sm text-gray-400 py-4 w-full border">
-                                 Development Version - Nova Consulting v' . trim($version) . '
+                                 Development Version - Nova Consulting v' . trim($version) . ' - <a href="https://wa.me/message/7CSBBMXFEUUXI1" target="_blank">Reportar un error</a>
                             </div>
                         ');
                     }
