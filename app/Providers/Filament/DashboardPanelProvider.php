@@ -30,8 +30,13 @@ class DashboardPanelProvider extends PanelProvider
             ->default()
             ->id('dashboard')
             ->path('dashboard')
+            ->viteTheme('resources/css/filament/dashboard/theme.css')
             ->login()
             ->brandName('Acceso Empleados')
+            ->globalSearch(false)
+            ->sidebarCollapsibleOnDesktop() // Agrega el botón para colapsar el menú y dejar solo los íconos
+            ->sidebarWidth('16rem') // Hace el menú un poco más esbelto y elegante (por defecto es muy ancho)
+            ->collapsedSidebarWidth('5rem')
             ->colors([
                 'primary' => Color::Olive,
             ])
@@ -59,25 +64,61 @@ class DashboardPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->viteTheme('resources/css/filament/dashboard/theme.css')
             ->renderHook(
                 PanelsRenderHook::FOOTER,
                 function () {
                     $versionFile = base_path('version.txt');
                     $version = file_exists($versionFile) ? file_get_contents($versionFile) : 'Dev (Local)';
 
-                    if (env('APP_ENV') === 'production') {
+                    if (app()->environment('production')) {
                         return new HtmlString('
-                            <div class="text-center text-sm text-gray-400 py-4">
-                                 Hannah Reforme Sutdio v' . trim($version) . '
+                            <div class="text-center text-sm text-white py-4 w-full bg-[#2C2C2C]">
+                                 Hannah Reforme Sutdio v' . trim($version) . ' - With ❤️ by <a href="https://novaconsulting.com" target="_blank">Nova Consulting</a>
                             </div>
                         ');
                     } else {
                         return new HtmlString('
-                            <div class="text-center text-sm text-gray-400 py-4 w-full border">
-                                 Development Version - Nova Consulting v' . trim($version) . ' - <a href="https://wa.me/message/7CSBBMXFEUUXI1" target="_blank">Reportar un error</a>
+                            <div class="text-center text-sm text-black py-4 w-full bg-[#e3ad3f]">
+                                 Development Version - Nova Consulting v' . trim($version) . ' - <a href="https://wa.me/+529611465703?text=Hola,%20necesito%20soporte%20con%20el%20sistema%20Hannah%20Reforme" target="_blank">Reportar un error</a>
                             </div>
                         ');
                     }
+                }
+            )
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_LOGO_AFTER,
+                function () {
+                    // Si NO estamos en producción, mostramos la alerta
+                    if (!app()->environment('production')) {
+                        return new HtmlString('
+                            <div class="flex flex-1 items-center justify-center pointer-events-none  ml-3">
+                                <span class="bg-amber-500 text-black text-xs font-extrabold px-4 py-1.5 rounded-full shadow-md flex items-center gap-2 uppercase tracking-wider animate-pulse">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    Entorno de Pruebas
+                                </span>
+                            </div>
+                        ');
+                    }
+                    
+                    return ''; // En producción no renderiza nada
+                }
+            )
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_LOGO_AFTER,
+                function () {
+                    $versionFile = base_path('version.txt');
+                    $version = file_exists($versionFile) ? file_get_contents($versionFile) : 'Dev (Local)';
+                    // Si NO estamos en producción, mostramos la alerta
+                    if (!app()->environment('production')) {
+                        return new HtmlString('
+                            <div class="ml-3 text-xs text-gray-500 pointer-events-none">
+                                v' . trim($version) . '
+                            </div>
+                        ');
+                    }
+                    
+                    return ''; // En producción no renderiza nada
                 }
             );
     }
