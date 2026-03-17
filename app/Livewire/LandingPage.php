@@ -50,72 +50,62 @@ class LandingPage extends Component
 
     public function calculateAvailableSlots()
     {
-        if (!$this->selectedTenant || !$this->selectedDate) {
-            return;
-        }
+        if (!$this->selectedTenant || !$this->selectedDate) return;
 
         $tenant = Tenant::find($this->selectedTenant);
         $date = Carbon::parse($this->selectedDate);
         $today = Carbon::now();
+        $capacity = $tenant->capacity_per_slot ?? 5;
 
-        // Validación 1: Mes en curso y no elegir fechas pasadas
         if ($date->gt($today->copy()->endOfMonth()) || $date->lt($today->copy()->startOfDay())) {
-            $this->addError('selectedDate', 'Fecha inválida o fuera del mes en curso.');
             $this->availableSlots = [];
             return;
         }
 
-        // Obtener citas ya agendadas para ese día
         $appointments = Appointment::where('tenant_id', $tenant->id)
             ->whereDate('date', $date->format('Y-m-d'))
             ->where('status', 'scheduled')
             ->get();
 
-        // Validación 2: Capacidad máxima diaria
-        if ($appointments->count() >= $tenant->max_appointments_per_day) {
-            $this->availableSlots = []; // Forzará a la vista a mostrar que no hay espacio
-            return;
-        }
-
-        // Validación 3: Extraer horario de apertura del Tenant
-        $dayOfWeek = $date->dayOfWeekIso; // 1 (Lunes) a 7 (Domingo)
+        $dayOfWeek = $date->dayOfWeekIso;
         $businessHours = collect($tenant->business_hours ?? [])->firstWhere('day', $dayOfWeek);
 
-        // Si no hay configuración para este día, está cerrado
-        if (!$businessHours) {
+        if (!$businessHours || empty($businessHours['slots'])) {
             $this->availableSlots = [];
             return;
         }
 
-        $openTime = Carbon::parse($businessHours['open']);
-        $closeTime = Carbon::parse($businessHours['close']);
-
         $slots = [];
-        $currentSlot = $openTime->copy();
 
-        // Generar bloques de 1 hora
-        while ($currentSlot->lt($closeTime)) {
-            $timeString = $currentSlot->format('H:i');
-
-            // Regla A: Si el día seleccionado es HOY, omitir horarios que ya pasaron
-            if ($date->isToday() && $currentSlot->copy()->setDate($date->year, $date->month, $date->day)->isPast()) {
-                $currentSlot->addHour();
+        foreach ($businessHours['slots'] as $timeString) {
+            $slotTime = Carbon::parse($date->format('Y-m-d') . ' ' . $timeString);
+            
+            if ($slotTime->isPast()) {
                 continue;
             }
 
-            // Regla B: Omitir si el slot ya fue reservado (1 persona por slot)
-            $isBooked = $appointments->contains(function ($appointment) use ($timeString) {
-                return Carbon::parse($appointment->time_slot)->format('H:i') === $timeString;
-            });
+            $bookedCount = $appointments->filter(function ($app) use ($timeString) {
+                return Carbon::parse($app->time_slot)->format('H:i') === $timeString;
+            })->count();
 
-            if (!$isBooked) {
-                $slots[] = $timeString;
+            $availableSpots = $capacity - $bookedCount;
+
+            if ($availableSpots > 0) {
+                // Definir color para la vista de Livewire
+                if ($availableSpots >= 3) $color = 'emerald';
+                elseif ($availableSpots == 2) $color = 'amber';
+                else $color = 'orange';
+
+                $slots[] = [
+                    'time' => $timeString,
+                    'formatted' => date('h:i A', strtotime($timeString)),
+                    'available' => $availableSpots,
+                    'color' => $color
+                ];
             }
-
-            $currentSlot->addHour();
         }
 
-        $this->availableSlots = $slots;
+        $this->availableSlots = $slots; // Ahora es un arreglo de arreglos, no solo un texto
     }
 
     public function selectSlot($slot)

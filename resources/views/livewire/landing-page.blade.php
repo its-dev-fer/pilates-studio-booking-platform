@@ -100,15 +100,27 @@
                     @if(count($availableSlots) > 0)
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-3">Horarios Disponibles</label>
-                            <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
-                                @foreach($availableSlots as $slot)
-                                    <button type="button"
-                                            wire:click="selectSlot('{{ $slot }}')"
-                                            class="py-2 text-sm rounded-lg border transition-all text-center font-medium
-                                            {{ $selectedSlot === $slot ? 'bg-primary text-black border-primary shadow-md' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}">
-                                        {{ $slot }}
+                            <div class="grid grid-cols-2 gap-3 mt-4">
+                                @forelse($availableSlots as $slot)
+                                    <button 
+                                        type="button"
+                                        wire:click="$set('selectedSlot', '{{ $slot['time'] }}')"
+                                        class="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition 
+                                        {{ $selectedSlot === $slot['time'] 
+                                            ? 'border-black bg-black text-white' 
+                                            : 'border-' . $slot['color'] . '-200 bg-' . $slot['color'] . '-50 text-gray-800 hover:border-' . $slot['color'] . '-500' 
+                                        }}"
+                                    >
+                                        <span class="font-bold text-lg">{{ $slot['formatted'] }}</span>
+                                        <span class="text-xs font-semibold {{ $selectedSlot === $slot['time'] ? 'text-gray-200' : 'text-' . $slot['color'] . '-600' }}">
+                                            {{ $slot['available'] }} lugares libres
+                                        </span>
                                     </button>
-                                @endforeach
+                                @empty
+                                    <div class="col-span-2 text-center py-4 text-gray-500">
+                                        No hay clases disponibles para este día.
+                                    </div>
+                                @endforelse
                             </div>
                             @error('selectedSlot') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>

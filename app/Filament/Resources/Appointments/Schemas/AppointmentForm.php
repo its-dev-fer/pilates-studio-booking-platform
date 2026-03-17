@@ -36,75 +36,84 @@ class AppointmentForm
                         ->afterStateUpdated(fn (callable $set) => $set('time_slot', null)),// Resetea la hora si cambian la fecha
 
                     Select::make('time_slot')
-                        ->label('Horario Disponible')
+                        ->label('Horario de Clase')
                         ->required()
                         ->searchable()
-                        ->helperText('Selecciona la fecha primero. Solo se muestran horarios disponibles.')
+                        ->allowHtml() // Permitimos inyectar colores en las opciones
+                        ->helperText('Selecciona la fecha primero. Se muestran los lugares disponibles.')
                         ->options(function (callable $get, ?Appointment $record) {
                             $dateStr = $get('date');
-                            if (!$dateStr) {
-                                return [];
-                            }
+                            if (!$dateStr) return [];
 
                             $tenant = Filament::getTenant();
                             $date = \Carbon\Carbon::parse($dateStr);
-                            $today = now();
+                            $capacity = $tenant->capacity_per_slot ?? 5; // Límite por clase
 
-                            $query = Appointment::where('tenant_id', $tenant->id)
-                                ->whereDate('date', $date->format('Y-m-d'))
-                                ->where('status', 'scheduled');
-
-                            if ($record) {
-                                $query->where('id', '!=', $record->id);
-                            }
-
-                            $appointments = $query->get();
-                            if ($appointments->count() >= $tenant->max_appointments_per_day) {
-                                return []; // Capacidad máxima alcanzada
-                            }
-
-                            // 2. Extraer el horario operativo del día seleccionado
                             $dayOfWeek = $date->dayOfWeekIso;
                             $businessHours = collect($tenant->business_hours ?? [])->firstWhere('day', $dayOfWeek);
 
-                            if (!$businessHours) {
-                                return [];
-                            } // Día cerrado
+                            if (!$businessHours || empty($businessHours['slots'])) return []; // No hay clases este día
 
-                            $openTime = \Carbon\Carbon::parse($businessHours['open']);
-                            $closeTime = \Carbon\Carbon::parse($businessHours['close']);
-                            $slots = [];
-                            $currentSlot = $openTime->copy();
+                            // Buscar TODAS las citas del día para contar cuántas hay en cada horario
+                            $query = Appointment::where('tenant_id', $tenant->id)
+                                ->whereDate('date', $date->format('Y-m-d'))
+                                ->where('status', 'scheduled');
+                                
+                            if ($record) {
+                                $query->where('id', '!=', $record->id); // Ignorar la propia cita al editar
+                            }
+                            
+                            $appointments = $query->get();
+                            $availableOptions = [];
 
-                            // 3. Generar bloques de 1 hora
-                            while ($currentSlot->lt($closeTime)) {
-                                $timeString = $currentSlot->format('H:i');
-
-                                $isCurrentRecordSlot = $record
-                                    && $record->date->format('Y-m-d') === $date->format('Y-m-d')
+                            // Iteramos sobre los bloques exactos que definió el admin (ej. 06:00, 07:00, 09:00)
+                            foreach ($businessHours['slots'] as $timeString) {
+                                $slotTime = \Carbon\Carbon::parse($date->format('Y-m-d') . ' ' . $timeString);
+                                
+                                $isCurrentRecordSlot = $record 
+                                    && $record->date->format('Y-m-d') === $date->format('Y-m-d') 
                                     && \Carbon\Carbon::parse($record->time_slot)->format('H:i') === $timeString;
 
-                                // Omitir horas pasadas (PERO perdonar la hora original si estamos editando)
-                                if (!$isCurrentRecordSlot && $date->isToday() && $currentSlot->copy()->setDate($date->year, $date->month, $date->day)->isPast()) {
-                                    $currentSlot->addHour();
+                                // Omitir si la hora ya pasó (a menos que estemos editando ESA misma hora)
+                                if (!$isCurrentRecordSlot && $slotTime->isPast()) {
                                     continue;
                                 }
 
-                                // Omitir si ya está reservado ese bloque exacto
-                                $isBooked = $appointments->contains(function ($app) use ($timeString) {
+                                // Contar cuántas personas ya reservaron esta hora
+                                $bookedCount = $appointments->filter(function ($app) use ($timeString) {
                                     return \Carbon\Carbon::parse($app->time_slot)->format('H:i') === $timeString;
-                                });
+                                })->count();
 
-                                if (!$isBooked) {
-                                    $slots[$timeString] = $timeString;
+                                $availableSpots = $capacity - $bookedCount;
+
+                                // Si hay lugares disponibles (o es la cita actual), lo agregamos con colores
+                                if ($availableSpots > 0 || $isCurrentRecordSlot) {
+                                    // Lógica de Semáforo
+                                    if ($availableSpots >= 3) {
+                                        $color = 'text-emerald-600'; // Verde
+                                        $status = 'Disponible';
+                                    } elseif ($availableSpots == 2) {
+                                        $color = 'text-amber-500'; // Amarillo
+                                        $status = 'Casi lleno';
+                                    } else {
+                                        $color = 'text-orange-600'; // Naranja
+                                        $status = 'Último lugar';
+                                    }
+
+                                    $formattedTime = date('h:i A', strtotime($timeString));
+                                    
+                                    // Diseño HTML para la opción del Select
+                                    $html = "<div class='flex justify-between items-center w-full'>
+                                                <span class='font-medium'>{$formattedTime}</span>
+                                                <span class='text-sm font-bold {$color}'>{$availableSpots} lugares ({$status})</span>
+                                             </div>";
+                                             
+                                    $availableOptions[$timeString] = $html;
                                 }
-
-                                $currentSlot->addHour();
                             }
 
-                            return $slots;
+                            return $availableOptions;
                         }),
-
                     Select::make('status')
                         ->label('Estado')
                         ->options([

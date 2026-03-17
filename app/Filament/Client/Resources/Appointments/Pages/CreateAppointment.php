@@ -38,20 +38,25 @@ class CreateAppointment extends CreateRecord
         $user = auth()->user();
         $tenantId = Filament::getTenant()->id;
         $date = $data['date'];
+        $timeSlot = $data['time_slot'];
 
-        $existingAppointment = Appointment::where('user_id', $user->id)
+        $formattedTime = \Carbon\Carbon::parse($timeSlot)->format('H:i');
+
+        // NUEVA REGLA: Verificar si el cliente ya está en ESTA MISMA CLASE
+        $existingAppointment = \App\Models\Appointment::where('user_id', $user->id)
             ->whereDate('date', $date)
-            ->where('status', 'scheduled') // Solo contamos las activas, si canceló antes, sí puede volver a agendar
+            ->where('time_slot', 'like', $formattedTime . '%')
+            ->where('status', 'scheduled')
             ->exists();
 
         if ($existingAppointment) {
             Notification::make()
-                ->title('Límite de citas diario')
-                ->body('Ya tienes una clase agendada para este día. Por favor, selecciona otra fecha.')
+                ->title('Ya estás en esta clase')
+                ->body('Ya tienes un lugar reservado a las ' . $formattedTime . '. Si deseas agendar otra clase, selecciona un horario diferente.')
                 ->danger()
                 ->send();
 
-            $this->halt(); // Cancela la creación
+            $this->halt();
         }
 
         $activeCredit = UserCredit::where('user_id', $user->id)

@@ -71,7 +71,7 @@ jobs:
             git pull origin release/${{ steps.tag_version.outputs.new_tag }}
 
             # 4. Instalar dependencias de PHP (composer sí está en tu server)
-            composer install --no-interaction --prefer-dist --optimize-autoloader
+            composer update --no-interaction --prefer-dist --optimize-autoloader
 
             # 5. Guardar la versión para Filament
             echo "${{ steps.tag_version.outputs.new_tag }}" > version.txt

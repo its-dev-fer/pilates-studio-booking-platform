@@ -42,9 +42,9 @@ class TenantForm
                     TextInput::make('max_appointments_per_day')
                         ->label('Límite de citas por día')
                         ->numeric()
-                        ->default(20)
+                        ->default(5)
                         ->required()
-                        ->helperText('Máximo de personas que pueden agendar en un solo día.'),
+                        ->helperText('Máximo de personas que pueden agendar en una clase.'),
 
                     TextInput::make('shipping_fee')
                         ->label('Costo de Envío (E-commerce)')
@@ -54,28 +54,35 @@ class TenantForm
                         ->required(),
 
                     Repeater::make('business_hours')
-                        ->label('Horarios de Operación Por Dia')
+                        ->label('Programación de Clases por Día')
                         ->schema([
                             Select::make('day')
                                 ->label('Día de la semana')
                                 ->options([
                                     1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles',
                                     4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo',
-                                ])->required(),
-                            TimePicker::make('open')
-                                ->label('Hora de Apertura')->seconds(false)->required(),
-                            TimePicker::make('close')->label('Hora de Cierre')->seconds(false)->required(),
+                                ])
+                                ->required()
+                                ->distinct()
+                                ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
+                            Select::make('slots')
+                                ->label('Horarios de las clases')
+                                ->multiple()
+                                ->options(function () {
+                                    $hours = [];
+                                    for ($i = 6; $i <= 21; $i++) {
+                                        $time = sprintf('%02d:00', $i);
+                                        $hours[$time] = date('h:i A', strtotime($time));
+                                    }
+                                    return $hours;
+                                })
+                                ->required()
+                                ->helperText('Selecciona todas las horas en las que habrá clase este día.'),
                         ])
-                        ->columns(3)
+                        ->columns(2)
                         ->columnSpanFull()
-                        ->default([
-                            ['day' => 1, 'open' => '09:00', 'close' => '18:00'],
-                            ['day' => 2, 'open' => '09:00', 'close' => '18:00'],
-                            ['day' => 3, 'open' => '09:00', 'close' => '18:00'],
-                            ['day' => 4, 'open' => '09:00', 'close' => '18:00'],
-                            ['day' => 5, 'open' => '09:00', 'close' => '18:00'],
-                        ])
-                        ->helperText('Agrega solo los días que la sucursal está abierta.'),
+                        ->cloneable()
+                        ->maxItems(7),
                     ])->columns(2),
             ]);
     }

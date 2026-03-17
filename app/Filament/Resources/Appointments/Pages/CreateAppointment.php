@@ -19,22 +19,27 @@ class CreateAppointment extends CreateRecord
     {
         $userId = $data['user_id'];
         $date = $data['date'];
+        $timeSlot = $data['time_slot'];
 
-        // REGLA: Verificar si el cliente ya tiene una cita ese mismo día (sea en esta sucursal o en otra)
-        $existingAppointment = Appointment::where('user_id', $userId)
+        // Formateamos para evitar problemas con los segundos (09:00 vs 09:00:00)
+        $formattedTime = \Carbon\Carbon::parse($timeSlot)->format('H:i');
+
+        // REGLA: Verificar si el cliente ya está en ESTA MISMA CLASE
+        $existingAppointment = \App\Models\Appointment::where('user_id', $userId)
             ->whereDate('date', $date)
+            ->where('time_slot', 'like', $formattedTime . '%')
             ->where('status', 'scheduled')
             ->exists();
 
         if ($existingAppointment) {
             Notification::make()
                 ->title('Doble reserva detectada')
-                ->body('Este cliente ya tiene una clase agendada para el ' . \Carbon\Carbon::parse($date)->format('d/m/Y') . '. No se permite más de una clase por día.')
+                ->body('Este cliente ya está inscrito en la clase de las ' . $formattedTime . '. No puede ocupar dos lugares en el mismo horario.')
                 ->danger()
                 ->persistent()
                 ->send();
 
-            $this->halt(); // Cancela y devuelve al formulario
+            $this->halt();
         }
 
         return $data;
