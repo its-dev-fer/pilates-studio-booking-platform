@@ -25,14 +25,22 @@ jobs:
           default_bump: patch
           tag_prefix: ""
 
+      - name: Configurar PHP (Necesario para compilar Filament)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3' # Ajusta si usas 8.3
+
+      - name: Generar carpeta Vendor (Para Vite)
+        run: composer install --no-interaction --prefer-dist --ignore-platform-reqs
+
       - name: Configurar Node.js (Para compilar assets)
         uses: actions/setup-node@v4
         with:
-          node-version: "24.5.0" # Puedes cambiarlo a la versión que uses (18 o 20 son comunes)
+          node-version: "20" # Usamos la versión LTS 20 por estabilidad
 
       - name: Instalar NPM y Compilar Assets en GitHub
         run: |
-          npm ci # Es como npm install pero más limpio para CI/CD
+          npm ci
           npm run build
 
       - name: Crear rama Release, agregar assets y subirla
@@ -41,9 +49,7 @@ jobs:
           git config user.email "actions@github.com"
           git checkout -b release/${{ steps.tag_version.outputs.new_tag }}
 
-          # Forzamos agregar la carpeta de assets compilados (usualmente ignorada en .gitignore)
-          # Si usas Laravel Vite, la carpeta es public/build.
-          # Si usas Laravel Mix (versiones más viejas), sería public/css y public/js
+          # Forzamos agregar la carpeta de assets compilados
           git add public/build -f
 
           # Hacemos el commit de los assets y subimos la rama
@@ -70,13 +76,14 @@ jobs:
             git checkout release/${{ steps.tag_version.outputs.new_tag }}
             git pull origin release/${{ steps.tag_version.outputs.new_tag }}
 
-            # 4. Instalar dependencias de PHP (composer sí está en tu server)
-            composer update --no-interaction --prefer-dist --optimize-autoloader
+            # 4. Instalar dependencias de PHP (Usamos install --no-dev por seguridad en producción)
+            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
             # 5. Guardar la versión para Filament
             echo "${{ steps.tag_version.outputs.new_tag }}" > version.txt
 
-            # 6. Limpiar caché de Laravel
-            php artisan optimize:clar
+            # 6. Limpiar caché de Laravel (¡Corregido el error de dedo!)
+            php artisan optimize:clear
 
-            php artisan migrate
+            # 7. Correr migraciones automáticamente de forma segura
+            php artisan migrate --force
