@@ -22,6 +22,6 @@ class CreditPackages extends Component
 
     public function render()
     {
-        return view('livewire.credit-packages')->layout('layouts.landing');
+        return view('livewire.credit-packages')->layout('layouts.app');
     }
 }

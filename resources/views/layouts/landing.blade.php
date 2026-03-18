@@ -40,7 +40,7 @@
 
                 <div class="flex-shrink-0 z-50 relative">
                     <a href="#" class="text-white text-3xl font-extrabold tracking-wider transition-transform duration-300 hover:scale-105 inline-block">
-                        Hannah Reforme
+                        <img src="{{ asset('assets/hannah_logo.png') }}" alt="Hannah Reforme Studio" class="h-auto w-24 invert-100">
                     </a>
                 </div>
 
@@ -50,7 +50,7 @@
                         <a href="#clases" class="nav-link relative text-gray-200 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-300">Clases</a>
                         <a href="#testimonios" class="nav-link relative text-gray-200 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-300">Testimonios</a>
                         <a href="#ubicacion" class="nav-link relative text-gray-200 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-300">Ubicación</a>
-
+                        <a href="/comprar-creditos" class="nav-link relative text-gray-200 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-300">Comprar Creditos</a>
                         <div class="relative group">
                             <div class="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
                             <a href="/clientes/login" class="relative bg-black border border-white/20 text-white hover:text-black px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 hover:bg-primary hover:border-primary flex items-center">
@@ -87,6 +87,7 @@
             <a href="#clases" @click="mobileMenuOpen = false" class="text-3xl font-bold text-white hover:text-primary transition-colors transform hover:scale-110 duration-300">Clases</a>
             <a href="#testimonios" @click="mobileMenuOpen = false" class="text-3xl font-bold text-white hover:text-primary transition-colors transform hover:scale-110 duration-300">Testimonios</a>
             <a href="#ubicacion" @click="mobileMenuOpen = false" class="text-3xl font-bold text-white hover:text-primary transition-colors transform hover:scale-110 duration-300">Ubicación</a>
+            <a href="/comprar-creditos" @click="mobileMenuOpen = false" class="text-3xl font-bold text-white hover:text-primary transition-colors transform hover:scale-110 duration-300">Comprar Creditos</a>
 
             <div class="w-full h-px bg-white/20 my-4"></div>
 

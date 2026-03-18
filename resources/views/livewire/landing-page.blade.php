@@ -102,13 +102,13 @@
                             <label class="block text-sm font-bold text-gray-700 mb-3">Horarios Disponibles</label>
                             <div class="grid grid-cols-2 gap-3 mt-4">
                                 @forelse($availableSlots as $slot)
-                                    <button 
+                                    <button
                                         type="button"
                                         wire:click="$set('selectedSlot', '{{ $slot['time'] }}')"
-                                        class="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition 
-                                        {{ $selectedSlot === $slot['time'] 
-                                            ? 'border-black bg-black text-white' 
-                                            : 'border-' . $slot['color'] . '-200 bg-' . $slot['color'] . '-50 text-gray-800 hover:border-' . $slot['color'] . '-500' 
+                                        class="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition
+                                        {{ $selectedSlot === $slot['time']
+                                            ? 'border-black bg-black text-white'
+                                            : 'border-' . $slot['color'] . '-200 bg-' . $slot['color'] . '-50 text-gray-800 hover:border-' . $slot['color'] . '-500'
                                         }}"
                                     >
                                         <span class="font-bold text-lg">{{ $slot['formatted'] }}</span>
@@ -282,7 +282,7 @@
 
     <footer class="bg-black py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <span class="text-white text-2xl font-bold tracking-wider mb-4 block">Hannah<span class="text-primary">Reforme</span></span>
+            <img src="{{ asset('assets/hannah_logo.png') }}" alt="Hannah Reforme Studio" class="h-auto w-24 invert-100 block mx-auto">
             <p class="text-gray-400 text-sm">© {{ date('Y') }} Hannah Reforme Studio. Todos los derechos reservados.</p>
             <a href="/dashboard/login" class="text-white font-medium">Portal de empleados</a>
         </div>
