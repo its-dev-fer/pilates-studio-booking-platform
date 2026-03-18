@@ -80,7 +80,7 @@
                         <div class="flex flex-wrap gap-3">
                             @foreach($tenants as $tenant)
                                 <button type="button"
-                                        wire:click="$set('selectedTenant', {{ $tenant->id }})"
+                                        wire:click="selectTenant({{ $tenant->id }})"
                                         class="px-5 py-2 rounded-full border-2 transition-all font-medium
                                         {{ $selectedTenant === $tenant->id ? 'border-primary bg-primary text-black' : 'border-gray-200 text-gray-600 hover:border-primary' }}">
                                     {{ $tenant->name }}

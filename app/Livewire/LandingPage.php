@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\Tenant;
 use App\Models\User;
 use Carbon\Carbon;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -129,18 +130,36 @@ class LandingPage extends Component
 
         // Regla 1: Si el usuario existe, redirigir al login
         if ($user) {
-            session()->flash('message', 'Parece que ya tienes una cuenta. Inicia sesión para continuar con tu reserva.');
+            session(['pending_booking' => [
+                'tenant_id' => $this->selectedTenant,
+                'date' => $this->selectedDate,
+                'time_slot' => $this->selectedSlot,
+            ]]);
+
+            session()->save();
+
+            if (auth()->check() && auth()->id() === $user->id) {
+                // Cambia '/dashboard' por la URL real de tu panel de clientes
+                return redirect('/clientes'); 
+            }
+
+            // 2. Le avisamos y lo mandamos al login de tu panel de clientes
+            Notification::make()
+                ->title('¡Hola de nuevo!')
+                ->body('Detectamos que ya tienes una cuenta. Por favor, inicia sesión para confirmar tu lugar de inmediato.')
+                ->warning()
+                ->duration(8000) // Le damos 8 segundos para que lo alcance a leer
+                ->persistent()
+                ->send();
             return redirect()->route('filament.clientes.auth.login'); // Ruta de login del panel clientes
         }
 
         // Regla 2: Si no existe, crearlo
-        $password = Str::random(8);
         $user = User::create([
             'name' => $this->name,
             'last_name' => $this->last_name,
             'email' => $this->email,
             'phone' => $this->phone,
-            'password' => Hash::make($password),
         ]);
 
         // Asignar rol y vincular a todos los tenants
@@ -159,8 +178,22 @@ class LandingPage extends Component
             'time_slot' => $this->selectedSlot,
         ]]);
 
-        session()->flash('success_registro', '¡Cuenta creada! Tu contraseña temporal es: ' . $password . ' (Cópiala). Redirigiendo al pago...');
+        session()->flash('success_registro', '¡Cuenta creada! Redirigiendo al pago...');
 
         return redirect()->route('checkout.credits');
+    }
+
+    public function selectTenant($tenantId)
+    {
+        $this->selectedTenant = $tenantId;
+        $this->selectedSlot = null; // Borramos la hora seleccionada
+        $this->calculateAvailableSlots(); // Recalculamos
+    }
+
+    // Se ejecuta al cambiar el input de fecha (gracias al wire:model.live)
+    public function updatedSelectedDate($value)
+    {
+        $this->selectedSlot = null;
+        $this->calculateAvailableSlots();
     }
 }

@@ -34,11 +34,9 @@ class UserForm
                         ->tel()
                         ->maxLength(10),
                     TextInput::make('password')
-                        ->password()
-                        ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                         ->dehydrated(fn ($state) => filled($state))
-                        ->required(fn (string $context): bool => $context === 'create')
-                        ->maxLength(255),
+                        ->required(fn (string $context): bool => $context === 'edit')
+                        ->hiddenOn('create'),
                 ])->columns(2),
 
                 Section::make('Accesos y Permisos')->schema([

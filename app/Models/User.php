@@ -23,6 +23,8 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     use HasRoles;
     use Billable;
 
+    public ?string $plain_password = null;
+
     protected $fillable = [
         'name',
         'last_name',
