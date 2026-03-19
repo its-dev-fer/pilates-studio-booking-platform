@@ -91,15 +91,15 @@
 
     <script type="application/ld+json">
         {
-            "@context": "https://schema.org",
-            "@type": "HealthClub",
+            "\u0040context": "https://schema.org",
+            "\u0040type": "HealthClub",
             "name": "{{ config('app.name', 'Hannah Reforme Studio') }}",
             "url": "{{ config('app.url') }}",
             "image": "{{ asset('assets/hannah_logo.png') }}",
             "description": "Estudio de pilates reformer y entrenamiento funcional con reserva en línea.",
             "sameAs": [],
             "potentialAction": {
-                "@type": "ReserveAction",
+                "\u0040type": "ReserveAction",
                 "target": "{{ url()->current() }}#reserva"
             }
         }
@@ -107,8 +107,8 @@
 
     <script type="application/ld+json">
         {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
+            "\u0040context": "https://schema.org",
+            "\u0040type": "WebSite",
             "name": "{{ config('app.name', 'Hannah Reforme Studio') }}",
             "url": "{{ config('app.url') }}",
             "inLanguage": "es-MX"
