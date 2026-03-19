@@ -391,7 +391,7 @@
 
                 <div class="h-80 overflow-hidden rounded-3xl border border-white/10 shadow-2xl sm:h-96 lg:h-auto">
                     <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3762.6617937409257!2d-99.1718817850934!3d19.42702448688785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1ff35f5bd1563%3A0x6c366f0e2de02ff7!2sEl%20Ángel%20de%20la%20Independencia!5e0!3m2!1ses!2smx!4v1655000000000!5m2!1ses!2smx"
+                        src="https://www.google.com/maps/embed?pb=!1m12!1m8!1m3!1d238.77741463366903!2d-93.14167695503912!3d16.75483891336421!3m2!1i1024!2i768!4f13.1!2m1!1sBoulevard%20Belisario%20Dominguez%20Plaza%201802!5e0!3m2!1ses-419!2smx!4v1773956260404!5m2!1ses-419!2smx"
                         width="100%"
                         height="100%"
                         style="border:0;"
