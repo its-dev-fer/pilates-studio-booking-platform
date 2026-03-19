@@ -14,10 +14,16 @@
     @livewireStyles
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        :root { color-scheme: light; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 18% -8%, rgba(206, 185, 160, 0.18), transparent 38%),
+                        radial-gradient(circle at 92% 0%, rgba(94, 107, 88, 0.05), transparent 32%),
+                        rgb(255, 255, 253);
+        }
     </style>
 </head>
-<body class="antialiased bg-gray-50 text-gray-900">
+<body class="antialiased text-stone-800">
 
     <main>
         {{ $slot }}
