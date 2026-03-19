@@ -3,13 +3,38 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', 'Hannah Reforme Studio') }}</title>
-    <meta name="description" content="Hannah Reforme Studio - Clases de pilates reformer, fuerza y movilidad con reserva en línea.">
+    <title>{{ config('app.name', 'Hannah Reforme Studio') }} | Pilates Reformer y Reserva de Clases</title>
+    <meta name="description" content="Hannah Reforme Studio: clases de pilates reformer, fuerza y movilidad en grupos reducidos. Reserva en línea y transforma tu cuerpo con coaches expertos.">
+    <meta name="keywords" content="pilates reformer, clases de pilates, estudio de pilates, movilidad, fuerza funcional, reserva de clases, Hannah Reforme Studio">
+    <meta name="author" content="Hannah Reforme Studio">
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+    <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+    <meta name="theme-color" content="#020617">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
+    <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="alternate" hreflang="es-mx" href="{{ url()->current() }}">
+    <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
+
+    <meta property="og:locale" content="es_MX">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ config('app.name', 'Hannah Reforme Studio') }}">
+    <meta property="og:title" content="{{ config('app.name', 'Hannah Reforme Studio') }} | Pilates Reformer y Reserva de Clases">
+    <meta property="og:description" content="Reserva clases de pilates reformer, fuerza y movilidad en Hannah Reforme Studio. Entrena con técnica, seguridad y resultados.">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('assets/hannah_logo.png') }}">
+    <meta property="og:image:alt" content="Hannah Reforme Studio logo">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ config('app.name', 'Hannah Reforme Studio') }} | Pilates Reformer y Reserva de Clases">
+    <meta name="twitter:description" content="Clases de pilates reformer y reserva en línea en Hannah Reforme Studio.">
+    <meta name="twitter:image" content="{{ asset('assets/hannah_logo.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//videos.pexels.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="preload" as="image" href="{{ asset('assets/hannah_logo.png') }}">
 
@@ -63,6 +88,32 @@
             }
         }
     </style>
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "HealthClub",
+            "name": "{{ config('app.name', 'Hannah Reforme Studio') }}",
+            "url": "{{ config('app.url') }}",
+            "image": "{{ asset('assets/hannah_logo.png') }}",
+            "description": "Estudio de pilates reformer y entrenamiento funcional con reserva en línea.",
+            "sameAs": [],
+            "potentialAction": {
+                "@type": "ReserveAction",
+                "target": "{{ url()->current() }}#reserva"
+            }
+        }
+    </script>
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "{{ config('app.name', 'Hannah Reforme Studio') }}",
+            "url": "{{ config('app.url') }}",
+            "inLanguage": "es-MX"
+        }
+    </script>
 </head>
 <body
     class="antialiased text-white"
@@ -89,8 +140,8 @@
             <div class="flex items-center justify-between">
 
                 <div class="relative z-50 shrink-0">
-                    <a href="#" class="text-white text-3xl font-extrabold tracking-wider transition-transform duration-300 hover:scale-105 inline-block">
-                        <img src="{{ asset('assets/hannah_logo.png') }}" alt="Hannah Reforme Studio" width="96" height="96" fetchpriority="high" class="h-auto w-24 invert-100">
+                    <a href="/" aria-label="Ir a inicio" class="inline-block text-3xl font-extrabold tracking-wider text-white transition-transform duration-300 hover:scale-105">
+                        <img src="{{ asset('assets/hannah_logo.png') }}" alt="Hannah Reforme Studio" width="96" height="96" fetchpriority="high" decoding="async" class="h-auto w-24 invert-100">
                     </a>
                 </div>
 
