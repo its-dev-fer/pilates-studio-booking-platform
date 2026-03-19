@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Http\Middleware\ProcessPendingBooking;
 use App\Models\Tenant;
+use App\Support\FilamentBrandColors;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -11,7 +12,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
@@ -30,9 +30,7 @@ class ClientPanelProvider extends PanelProvider
         return $panel
             ->id('clientes')
             ->path('clientes')
-            ->colors([
-                'primary' => Color::Olive,
-            ])
+            ->colors(FilamentBrandColors::panelColors())
             ->brandName('Acceso Clientes')
             ->viteTheme('resources/css/filament/dashboard/theme.css')
             ->tenant(Tenant::class, slugAttribute: 'slug') // Multitenancy también en portal clientes

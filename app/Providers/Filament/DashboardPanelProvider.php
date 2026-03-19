@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Models\Tenant;
+use App\Support\FilamentBrandColors;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -10,7 +11,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
@@ -37,9 +37,7 @@ class DashboardPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop() // Agrega el botón para colapsar el menú y dejar solo los íconos
             ->sidebarWidth('16rem') // Hace el menú un poco más esbelto y elegante (por defecto es muy ancho)
             ->collapsedSidebarWidth('5rem')
-            ->colors([
-                'primary' => Color::Olive,
-            ])
+            ->colors(FilamentBrandColors::panelColors())
             ->tenant(Tenant::class, slugAttribute: 'slug') // Habilita Multitenancy
             // ->tenantRegistration(RegisterTenant::class) // Descomentar cuando creemos la página de registro de tenants para el Admin
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -64,7 +62,6 @@ class DashboardPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->viteTheme('resources/css/filament/dashboard/theme.css')
             ->renderHook(
                 PanelsRenderHook::FOOTER,
                 function () {
