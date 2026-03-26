@@ -68,6 +68,11 @@
                             Ya Soy Cliente
                         </a>
                     </div>
+                    <p class="text-center text-sm text-stone-600 lg:text-left">
+                        <a href="#tienda" class="font-semibold text-primary underline decoration-primary/30 underline-offset-4 transition hover:decoration-primary">
+                            Ver productos y categorías en la tienda en línea →
+                        </a>
+                    </p>
                 </div>
 
                 <div class="float-soft mx-auto w-full max-w-md rounded-3xl border border-stone-200/90 bg-white/75 p-5 shadow-xl shadow-stone-900/5 backdrop-blur-md sm:p-7">
@@ -123,6 +128,70 @@
                     </ul>
                 </article>
             </div>
+        </div>
+    </section>
+
+    <section id="tienda" class="scroll-mt-24 border-t border-stone-200/80 bg-linear-to-b from-[rgb(255,255,253)] via-tertiary/20 to-stone-100/50 py-16 sm:scroll-mt-28 sm:py-20 lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 flex flex-col gap-6 sm:mb-14 sm:flex-row sm:items-end sm:justify-between">
+                <div class="max-w-2xl text-center sm:text-left">
+                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Tienda en línea</p>
+                    <h2 class="mt-3 text-3xl font-black leading-tight text-stone-900 sm:text-4xl">
+                        Lleva contigo lo que amas del estudio
+                    </h2>
+                    <p class="mt-4 text-sm leading-relaxed text-stone-600 sm:text-base">
+                        Equipo, indumentaria y complementos seleccionados para entrenar con la misma energía dentro y fuera de clase. Explora por categoría y compra con envío o recogida en sucursal.
+                    </p>
+                </div>
+                <a
+                    href="{{ route('store.index') }}"
+                    class="inline-flex shrink-0 items-center justify-center self-center rounded-full border-2 border-primary bg-primary px-6 py-3 text-sm font-bold text-[rgb(255,255,253)] shadow-[0_14px_40px_-18px_rgba(94,107,88,0.45)] transition hover:-translate-y-0.5 hover:bg-primary/95 sm:self-end"
+                >
+                    Ir a la tienda completa
+                </a>
+            </div>
+
+            @if ($storeCategories->isEmpty())
+                <div class="rounded-3xl border border-dashed border-stone-300 bg-white/70 p-10 text-center shadow-inner">
+                    <p class="text-sm font-medium text-stone-700">Muy pronto publicaremos novedades en la tienda.</p>
+                    <a href="{{ route('store.index') }}" class="mt-4 inline-flex text-sm font-semibold text-primary hover:underline">Visitar tienda</a>
+                </div>
+            @else
+                <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+                    @foreach ($storeCategories as $category)
+                        <a
+                            href="{{ route('store.index') }}#category-{{ $category->id }}"
+                            class="group relative aspect-[4/5] overflow-hidden rounded-2xl border border-stone-200/90 bg-stone-900/5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_22px_50px_-28px_rgba(94,107,88,0.35)]"
+                        >
+                            @if (! empty($category->photo))
+                                <img
+                                    src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($category->photo) }}"
+                                    alt=""
+                                    class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
+                            @else
+                                <div class="absolute inset-0 bg-linear-to-br from-primary/35 via-stone-200/40 to-tertiary/40"></div>
+                                <div class="absolute inset-0 flex items-center justify-center opacity-90">
+                                    <svg class="h-14 w-14 text-primary/80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                    </svg>
+                                </div>
+                            @endif
+                            <div class="absolute inset-x-0 bottom-0 bg-linear-to-t from-stone-950/90 via-stone-950/55 to-transparent pt-16 pb-4 px-4">
+                                <p class="text-sm font-bold text-[rgb(255,255,253)] sm:text-base">{{ $category->name }}</p>
+                                <p class="mt-0.5 text-xs font-medium text-white/80">
+                                    {{ $category->active_products_count }} {{ $category->active_products_count === 1 ? 'producto' : 'productos' }}
+                                </p>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+                <p class="mt-8 text-center text-xs text-stone-500 sm:text-sm">
+                    Al hacer clic irás a la tienda y te llevamos directo a esa categoría.
+                </p>
+            @endif
         </div>
     </section>
 

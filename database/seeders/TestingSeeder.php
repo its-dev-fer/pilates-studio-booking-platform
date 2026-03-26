@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -16,10 +15,10 @@ class TestingSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Crear los Roles del Sistema (Spatie)
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $empleadoRole = Role::firstOrCreate(['name' => 'empleado']);
-        $clienteRole = Role::firstOrCreate(['name' => 'cliente']);
+        $this->call(RolesSeeder::class);
+
+        // 1. Rol administrador (ya creado por RolesSeeder)
+        $adminRole = Role::findByName('admin', 'web');
 
         // 2. Crear una Sucursal (Tenant) Inicial
         // Aunque el admin es omnipresente, Filament Multitenancy requiere
@@ -40,7 +39,7 @@ class TestingSeeder extends Seeder
             [
                 'name' => 'Super',
                 'last_name' => 'Administrador',
-                'password' => Hash::make('password'), // Tu contraseña será: password
+                'password' => Hash::make('password'),
                 'phone' => '9611003141',
             ]
         );

@@ -7,21 +7,21 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Laravel\Cashier\Billable;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, HasTenants
 {
-    use HasFactory;
-    use Notifiable;
-    use HasRoles;
     use Billable;
+    use HasFactory;
+    use HasRoles;
+    use Notifiable;
 
     public ?string $plain_password = null;
 
@@ -59,6 +59,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         if ($this->hasRole('admin')) {
             return true;
         }
+
         return $this->tenants()->whereKey($tenant)->exists();
     }
 
@@ -68,6 +69,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         if ($this->hasRole('admin')) {
             return Tenant::all();
         }
+
         return $this->tenants;
     }
 
@@ -113,5 +115,28 @@ class User extends Authenticatable implements FilamentUser, HasTenants
             ->where('balance', '>', 0)
             ->where('expires_at', '>', now())
             ->sum('balance');
+    }
+
+    /**
+     * Separa un nombre completo en nombre y apellido(s) para columnas NOT NULL.
+     * Si solo hay una palabra, se repite en apellido para cumplir la restricción de BD.
+     *
+     * @return array{name: string, last_name: string}
+     */
+    public static function splitFullNameForStorage(string $fullName): array
+    {
+        $trimmed = trim($fullName);
+        if ($trimmed === '') {
+            return ['name' => 'Cliente', 'last_name' => 'Cliente'];
+        }
+
+        $parts = preg_split('/\s+/u', $trimmed) ?: [];
+        $first = array_shift($parts) ?? $trimmed;
+        $last = trim(implode(' ', $parts));
+
+        return [
+            'name' => $first,
+            'last_name' => $last !== '' ? $last : $first,
+        ];
     }
 }

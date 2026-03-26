@@ -1,9 +1,13 @@
 <?php
 
 use App\Http\Controllers\CheckoutController;
+use App\Livewire\Checkout;
 use App\Livewire\CreditPackages;
-use Illuminate\Support\Facades\Route;
 use App\Livewire\LandingPage;
+use App\Livewire\ProductShow;
+use App\Livewire\ShoppingCart;
+use App\Livewire\StoreFront;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingPage::class)->name('home');
 
@@ -20,3 +24,8 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/login', function () {
     return redirect('/clientes/login');
 })->name('login');
+
+Route::get('/tienda', StoreFront::class)->name('store.index');
+Route::get('/tienda/producto/{slug}', ProductShow::class)->name('store.product.show');
+Route::get('/carrito', ShoppingCart::class)->name('store.cart');
+Route::get('/checkout', Checkout::class)->name('store.checkout');

@@ -10,8 +10,10 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_id',
+        'product_title',
         'quantity',
         'unit_price',
+        'variant_selected',
     ];
 
     protected function casts(): array
@@ -19,6 +21,7 @@ class OrderItem extends Model
         return [
             'unit_price' => 'decimal:2',
             'quantity' => 'integer',
+            'variant_selected' => 'array',
         ];
     }
 
