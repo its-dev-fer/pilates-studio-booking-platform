@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Tenant extends Model
 {
     protected $fillable = [
-        'name', 'slug', 'address', 'shipping_fee', 'max_appointments_per_day', 'business_hours', 'capacity_per_slot'
+        'name', 'slug', 'address', 'shipping_fee', 'max_appointments_per_day', 'business_hours', 'capacity_per_slot',
     ];
 
     protected $casts = [
@@ -18,5 +18,11 @@ class Tenant extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
+    }
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_tenant', 'tenant_id', 'product_id')
+            ->withTimestamps();
     }
 }

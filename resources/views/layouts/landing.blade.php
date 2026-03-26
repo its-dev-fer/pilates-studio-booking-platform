@@ -152,7 +152,7 @@
                         <a href="#ubicaciones" class="nav-link relative px-2 py-2 text-xs font-medium text-stone-600 transition-colors duration-300 hover:text-primary xl:px-3 xl:text-sm">Ubicaciones</a>
                         <a href="#horarios" class="nav-link relative px-2 py-2 text-xs font-medium text-stone-600 transition-colors duration-300 hover:text-primary xl:px-3 xl:text-sm">Horarios</a>
                         <a href="#membresias" class="nav-link relative px-2 py-2 text-xs font-medium text-stone-600 transition-colors duration-300 hover:text-primary xl:px-3 xl:text-sm">Membresías</a>
-                        <a href="#" class="nav-link relative px-2 py-2 text-xs font-medium text-stone-600 transition-colors duration-300 hover:text-primary xl:px-3 xl:text-sm">Tienda</a>
+                        <a href="{{ route('store.index') }}" class="nav-link relative px-2 py-2 text-xs font-medium text-stone-600 transition-colors duration-300 hover:text-primary xl:px-3 xl:text-sm">Tienda</a>
                         <a href="#contacto" class="nav-link relative px-2 py-2 text-xs font-medium text-stone-600 transition-colors duration-300 hover:text-primary xl:px-3 xl:text-sm">Contacto</a>
                         <div class="relative group">
                             <div class="absolute -inset-0.5 rounded-full bg-primary/25 blur-sm opacity-60 transition duration-500 group-hover:opacity-100"></div>
@@ -191,7 +191,7 @@
             <a href="#ubicaciones" @click="mobileMenuOpen = false" class="text-2xl font-bold text-stone-800 transition-colors duration-300 hover:text-primary">Ubicaciones</a>
             <a href="#horarios" @click="mobileMenuOpen = false" class="text-2xl font-bold text-stone-800 transition-colors duration-300 hover:text-primary">Horarios</a>
             <a href="#membresias" @click="mobileMenuOpen = false" class="text-2xl font-bold text-stone-800 transition-colors duration-300 hover:text-primary">Membresías</a>
-            <a href="#" @click="mobileMenuOpen = false" class="text-2xl font-bold text-stone-800 transition-colors duration-300 hover:text-primary">Tienda</a>
+            <a href="{{ route('store.index') }}" @click="mobileMenuOpen = false" class="text-2xl font-bold text-stone-800 transition-colors duration-300 hover:text-primary">Tienda</a>
             <a href="#contacto" @click="mobileMenuOpen = false" class="text-2xl font-bold text-stone-800 transition-colors duration-300 hover:text-primary">Contacto</a>
 
             <div class="my-4 h-px w-full bg-stone-200"></div>

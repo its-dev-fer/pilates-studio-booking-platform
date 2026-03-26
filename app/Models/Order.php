@@ -11,10 +11,17 @@ class Order extends Model
     protected $fillable = [
         'tenant_id',
         'user_id',
+        'guest_name',
+        'guest_email',
+        'guest_phone',
         'subtotal',
         'shipping_fee',
         'total',
-        'status', // creado, pagado, empacado, entregado, cancelado
+        'status',
+        'delivery_type',
+        'shipping_address',
+        'payment_method',
+        'payment_reference',
     ];
 
     protected function casts(): array

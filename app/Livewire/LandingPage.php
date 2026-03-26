@@ -3,30 +3,37 @@
 namespace App\Livewire;
 
 use App\Models\Appointment;
+use App\Models\Category;
 use App\Models\Tenant;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Livewire\Component;
 
 class LandingPage extends Component
 {
     // Propiedades del Formulario
     public $tenants;
+
     public $selectedTenant = null;
+
     public $selectedDate = null;
+
     public $selectedSlot = null;
+
     public $name;
+
     public $last_name;
+
     public $email;
+
     public $phone;
 
     // Estado de la UI
     public $availableSlots = [];
+
     public $maxDate;
 
     public function mount()
@@ -46,12 +53,29 @@ class LandingPage extends Component
 
     public function render()
     {
-        return view('livewire.landing-page')->layout('layouts.landing');
+        $storeCategories = Category::query()
+            ->whereHas('products', function ($query) {
+                $query->where('is_active', true)->where('stock', '>', 0);
+            })
+            ->withCount([
+                'products as active_products_count' => function ($query) {
+                    $query->where('is_active', true)->where('stock', '>', 0);
+                },
+            ])
+            ->orderBy('name')
+            ->limit(8)
+            ->get();
+
+        return view('livewire.landing-page', [
+            'storeCategories' => $storeCategories,
+        ])->layout('layouts.landing');
     }
 
     public function calculateAvailableSlots()
     {
-        if (!$this->selectedTenant || !$this->selectedDate) return;
+        if (! $this->selectedTenant || ! $this->selectedDate) {
+            return;
+        }
 
         $tenant = Tenant::find($this->selectedTenant);
         $date = Carbon::parse($this->selectedDate);
@@ -60,6 +84,7 @@ class LandingPage extends Component
 
         if ($date->gt($today->copy()->endOfMonth()) || $date->lt($today->copy()->startOfDay())) {
             $this->availableSlots = [];
+
             return;
         }
 
@@ -71,16 +96,17 @@ class LandingPage extends Component
         $dayOfWeek = $date->dayOfWeekIso;
         $businessHours = collect($tenant->business_hours ?? [])->firstWhere('day', $dayOfWeek);
 
-        if (!$businessHours || empty($businessHours['slots'])) {
+        if (! $businessHours || empty($businessHours['slots'])) {
             $this->availableSlots = [];
+
             return;
         }
 
         $slots = [];
 
         foreach ($businessHours['slots'] as $timeString) {
-            $slotTime = Carbon::parse($date->format('Y-m-d') . ' ' . $timeString);
-            
+            $slotTime = Carbon::parse($date->format('Y-m-d').' '.$timeString);
+
             if ($slotTime->isPast()) {
                 continue;
             }
@@ -93,15 +119,19 @@ class LandingPage extends Component
 
             if ($availableSpots > 0) {
                 // Definir color para la vista de Livewire
-                if ($availableSpots >= 3) $color = 'emerald';
-                elseif ($availableSpots == 2) $color = 'amber';
-                else $color = 'orange';
+                if ($availableSpots >= 3) {
+                    $color = 'emerald';
+                } elseif ($availableSpots == 2) {
+                    $color = 'amber';
+                } else {
+                    $color = 'orange';
+                }
 
                 $slots[] = [
                     'time' => $timeString,
                     'formatted' => date('h:i A', strtotime($timeString)),
                     'available' => $availableSpots,
-                    'color' => $color
+                    'color' => $color,
                 ];
             }
         }
@@ -140,7 +170,7 @@ class LandingPage extends Component
 
             if (auth()->check() && auth()->id() === $user->id) {
                 // Cambia '/dashboard' por la URL real de tu panel de clientes
-                return redirect('/clientes'); 
+                return redirect('/clientes');
             }
 
             // 2. Le avisamos y lo mandamos al login de tu panel de clientes
@@ -151,6 +181,7 @@ class LandingPage extends Component
                 ->duration(8000) // Le damos 8 segundos para que lo alcance a leer
                 ->persistent()
                 ->send();
+
             return redirect()->route('filament.clientes.auth.login'); // Ruta de login del panel clientes
         }
 
