@@ -5,6 +5,7 @@ namespace App\Filament\Resources\CreditPackages\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -17,6 +18,9 @@ class CreditPackagesTable
                TextColumn::make('name')->searchable(),
                 TextColumn::make('credits_amount')->label('Créditos')->sortable()->badge(),
                 TextColumn::make('price')->money('mxn')->sortable(),
+                IconColumn::make('is_one_time_purchase')
+                    ->label('Compra única')
+                    ->boolean(),
                 TextColumn::make('stripe_price_id')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\CreditPackage;
+use Illuminate\Support\Facades\Auth;
 
 class CreditPackages extends Component
 {
@@ -12,9 +13,18 @@ class CreditPackages extends Component
 
     public function mount()
     {
-        $this->packages = CreditPackage::all();
+        $user = Auth::user();
 
-        $this->activeCredits = auth()->user()->credits()
+        $this->packages = CreditPackage::query()
+            ->where(function ($query) use ($user) {
+                $query->where('is_one_time_purchase', false)
+                    ->orWhereDoesntHave('purchases', function ($purchaseQuery) use ($user) {
+                        $purchaseQuery->where('user_id', $user->id);
+                    });
+            })
+            ->get();
+
+        $this->activeCredits = $user->credits()
             ->where('balance', '>', 0)
             ->where('expires_at', '>', now())
             ->sum('balance');

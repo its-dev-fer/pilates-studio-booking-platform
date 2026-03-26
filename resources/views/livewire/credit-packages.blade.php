@@ -32,12 +32,23 @@
             </div>
         @endif
 
+        @if($packages->isEmpty())
+            <div class="mx-auto max-w-3xl rounded-2xl border border-stone-200 bg-white p-6 text-center shadow-sm">
+                <h3 class="text-lg font-bold text-stone-900">No hay paquetes disponibles</h3>
+                <p class="mt-2 text-sm text-stone-600">Por ahora no tienes paquetes para comprar. Si necesitas ayuda, contáctanos.</p>
+            </div>
+        @else
         <div class="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             @foreach($packages as $package)
             <div class="group relative overflow-hidden rounded-3xl border border-stone-200/90 bg-[rgb(255,255,253)] p-6 shadow-md shadow-stone-900/5 transition duration-300 hover:-translate-y-1 hover:border-tertiary/40 hover:shadow-[0_24px_50px_-28px_rgba(94,107,88,0.15)] sm:p-8">
                 <div class="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-tertiary/30 blur-2xl"></div>
                 <div class="relative flex h-full flex-col justify-between">
                     <div>
+                        @if($package->is_one_time_purchase)
+                            <span class="mb-4 inline-flex rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                                Compra única
+                            </span>
+                        @endif
                         <h3 class="mb-4 text-center text-2xl font-black text-stone-900">{{ $package->name }}</h3>
                         <div class="mb-6 text-center">
                             <span class="text-5xl font-black tracking-tight text-stone-900">${{ number_format($package->price, 2) }}</span>
@@ -79,5 +90,6 @@
             </div>
             @endforeach
         </div>
+        @endif
     </div>
 </div>

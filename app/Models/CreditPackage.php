@@ -11,6 +11,7 @@ class CreditPackage extends Model
         'credits_amount',
         'stripe_price_id',
         'price',
+        'is_one_time_purchase',
     ];
 
     protected function casts(): array
@@ -18,6 +19,12 @@ class CreditPackage extends Model
         return [
             'price' => 'decimal:2',
             'credits_amount' => 'integer',
+            'is_one_time_purchase' => 'boolean',
         ];
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(CreditPackagePurchase::class);
     }
 }

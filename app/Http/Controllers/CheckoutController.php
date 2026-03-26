@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\CreditPackage;
+use App\Models\CreditPackagePurchase;
 use App\Models\UserCredit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,18 @@ class CheckoutController extends Controller
      */
     public function process(Request $request, CreditPackage $package)
     {
+        $alreadyPurchased = $package->is_one_time_purchase
+            && CreditPackagePurchase::query()
+                ->where('user_id', $request->user()->id)
+                ->where('credit_package_id', $package->id)
+                ->exists();
+
+        if ($alreadyPurchased) {
+            return redirect()
+                ->route('checkout.credits')
+                ->with('error', 'Este paquete es de compra única y ya fue adquirido en tu cuenta.');
+        }
+
         // Se utiliza el método checkout de Cashier para cobros únicos
         return $request->user()->checkout([$package->stripe_price_id => 1], [
             'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&package_id=' . $package->id,
@@ -36,8 +49,21 @@ class CheckoutController extends Controller
 
         $package = CreditPackage::findOrFail($packageId);
 
+        $alreadyPurchased = false;
+
         // Iniciar transacción de BD para asegurar la integridad
-        DB::transaction(function () use ($user, $package) {
+        DB::transaction(function () use ($user, $package, &$alreadyPurchased) {
+            if ($package->is_one_time_purchase) {
+                $purchase = CreditPackagePurchase::firstOrCreate([
+                    'user_id' => $user->id,
+                    'credit_package_id' => $package->id,
+                ]);
+
+                if (! $purchase->wasRecentlyCreated) {
+                    $alreadyPurchased = true;
+                    return;
+                }
+            }
 
             // 1. Otorga los créditos al usuario (Por defecto, los asociamos al tenant 1 o al que el usuario seleccionó.
             // Según tus reglas, los créditos son por sucursal. Si la compra es global para reservar donde sea,
@@ -75,6 +101,12 @@ class CheckoutController extends Controller
                 // TODO: Lanzar Evento para enviar email de confirmación (Notificaciones)
             }
         });
+
+        if ($alreadyPurchased) {
+            return redirect()
+                ->route('checkout.credits')
+                ->with('error', 'Este paquete es de compra única y ya fue adquirido en tu cuenta.');
+        }
 
         // Redirigir al Panel de Clientes (App Panel de Filament)
         return redirect('/clientes')->with('success', '¡Pago exitoso! Tus créditos han sido abonados.');

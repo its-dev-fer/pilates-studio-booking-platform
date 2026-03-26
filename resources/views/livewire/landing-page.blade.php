@@ -57,7 +57,7 @@
                         Tu cuerpo cambia cuando tu energía cambia.
                     </h1>
                     <p class="mx-auto max-w-xl text-sm leading-relaxed text-stone-600 sm:text-base lg:mx-0">
-                        Clases dinámicas, personalizadas y en grupos reducidos para fortalecer, estilizar y mejorar tu postura.
+                        Clases dinámicas, personalizadas y en grupos reducidos para fortalecer tu cuerpo, estilizar y mejorar tu postura.
                         Vive la experiencia Hannah Reforme desde tu primera sesión.
                     </p>
                     <div class="flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
@@ -122,9 +122,8 @@
                     <br>
                     </p>
                     <ul class="mt-4 space-y-2 text-xs text-stone-600">
-                    <li>45 minutos de trabajo completo</li>
                     <li>Correcciones personalizadas en cada bloque</li>
-                    <li>Nivel: intermedio a avanzado</li>
+                    <li>Nivel: principiante, intermedio y avanzado</li>
                     </ul>
                 </article>
             </div>
@@ -207,7 +206,7 @@
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div class="rounded-3xl border border-stone-200/90 bg-white/80 p-6 shadow-sm sm:p-8">
-                    <h3 class="text-xl font-bold text-stone-900">Estructura Clase Reformer (50 min)</h3>
+                    <h3 class="text-xl font-bold text-stone-900">Estructura Clase Reformer</h3>
                     <div class="mt-6 space-y-4">
                         <div class="rounded-2xl border border-primary/25 bg-primary/10 p-4">
                             <p class="text-xs font-semibold uppercase tracking-wider text-primary">01. Activación</p>
