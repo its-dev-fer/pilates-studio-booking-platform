@@ -32,6 +32,9 @@ class ClientPanelProvider extends PanelProvider
             ->path('clientes')
             ->colors(FilamentBrandColors::panelColors())
             ->brandName('Acceso Clientes')
+            ->brandLogo(asset('assets/hannah_logo.png'))
+            ->darkModeBrandLogo(asset('assets/hannah_logo.png'))
+            ->brandLogoHeight('6rem')
             ->viteTheme('resources/css/filament/dashboard/theme.css')
             ->tenant(Tenant::class, slugAttribute: 'slug') // Multitenancy también en portal clientes
             ->discoverResources(in: app_path('Filament/Client/Resources'), for: 'App\Filament\Client\Resources')
@@ -62,6 +65,75 @@ class ClientPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                function () {
+                    if (! request()->routeIs('filament.clientes.auth.login')) {
+                        return '';
+                    }
+
+                    return new HtmlString('
+                        <style>
+                            body {
+                                background-image:
+                                    linear-gradient(rgba(0, 0, 0, 0.26), rgba(0, 0, 0, 0.36)),
+                                    url("' . asset('assets/client_bg.jpg') . '");
+                                background-size: cover;
+                                background-position: center;
+                                background-repeat: no-repeat;
+                                background-attachment: fixed;
+                            }
+
+                            .fi-simple-main-ctn,
+                            .fi-simple-main {
+                                animation: loginCardEnter 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+                            }
+
+                            .fi-simple-main {
+                                box-shadow: 0 24px 56px -26px rgba(0, 0, 0, 0.55) !important;
+                            }
+
+                            .fi-simple-main [type="submit"] {
+                                transition: transform 180ms ease, box-shadow 220ms ease, filter 220ms ease;
+                                box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.48);
+                                animation: loginButtonPop 540ms ease 180ms both;
+                            }
+
+                            .fi-simple-main [type="submit"]:hover {
+                                transform: translateY(-1px) scale(1.01);
+                                filter: brightness(1.03);
+                                box-shadow: 0 18px 34px -16px rgba(0, 0, 0, 0.58);
+                            }
+
+                            .fi-simple-main [type="submit"]:active {
+                                transform: translateY(0) scale(0.99);
+                            }
+
+                            @keyframes loginCardEnter {
+                                from {
+                                    opacity: 0;
+                                    transform: translateY(14px) scale(0.98);
+                                }
+                                to {
+                                    opacity: 1;
+                                    transform: translateY(0) scale(1);
+                                }
+                            }
+
+                            @keyframes loginButtonPop {
+                                from {
+                                    opacity: 0;
+                                    transform: translateY(6px) scale(0.97);
+                                }
+                                to {
+                                    opacity: 1;
+                                    transform: translateY(0) scale(1);
+                                }
+                            }
+                        </style>
+                    ');
+                }
+            )
             ->renderHook(
                 PanelsRenderHook::TOPBAR_LOGO_AFTER,
                 function () {
