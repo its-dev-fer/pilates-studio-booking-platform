@@ -3,3 +3,107 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../app/Providers/Filament/**/*.php';
+
+.pending-credit-alert {
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 1px solid #fcd34d;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.pending-credit-alert__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-bottom: 1px solid #fde68a;
+    background: rgba(253, 230, 138, 0.45);
+    padding: 1rem 1.25rem;
+}
+
+.pending-credit-alert__title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pending-credit-alert__icon-wrap {
+    display: inline-flex;
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    color: #b45309;
+    background: rgba(245, 158, 11, 0.16);
+    border: 1px solid rgba(245, 158, 11, 0.24);
+}
+
+.pending-credit-alert__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #451a03;
+}
+
+.pending-credit-alert__subtitle {
+    margin-top: 0.15rem;
+    font-size: 0.8rem;
+    color: #78350f;
+}
+
+.pending-credit-alert__badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background: #f59e0b;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.3rem 0.75rem;
+    text-transform: uppercase;
+}
+
+.pending-credit-alert__grid {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1rem 1.25rem;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+    .pending-credit-alert__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.pending-credit-alert__item {
+    border: 1px solid #fde68a;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.75);
+    padding: 0.75rem;
+}
+
+.pending-credit-alert__label {
+    margin: 0;
+    font-size: 0.67rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #b45309;
+}
+
+.pending-credit-alert__value {
+    margin-top: 0.25rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.pending-credit-alert__foot {
+    border-top: 1px solid #fde68a;
+    background: rgba(255, 251, 235, 0.75);
+    padding: 0.75rem 1.25rem;
+    font-size: 0.75rem;
+    color: #78350f;
+}

@@ -4,8 +4,10 @@ namespace App\Livewire;
 
 use App\Models\Appointment;
 use App\Models\Category;
+use App\Models\CreditPackagePromotion;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\CreditPackagePromotionPricing;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
@@ -53,6 +55,27 @@ class LandingPage extends Component
 
     public function render()
     {
+        $activePromotions = CreditPackagePromotion::query()
+            ->with('package')
+            ->where('starts_at', '<=', now())
+            ->where('ends_at', '>=', now())
+            ->orderBy('ends_at')
+            ->get()
+            ->map(function (CreditPackagePromotion $promotion): array {
+                $pricing = CreditPackagePromotionPricing::resolve($promotion->package, now());
+
+                return [
+                    'id' => $promotion->id,
+                    'package_name' => $promotion->package->name,
+                    'credits_amount' => (int) $promotion->package->credits_amount,
+                    'base_price' => (float) $pricing['base_price'],
+                    'final_price' => (float) $pricing['final_price'],
+                    'type' => $promotion->type,
+                    'discount_percent' => $promotion->discount_percent,
+                    'ends_at' => $promotion->ends_at,
+                ];
+            });
+
         $storeCategories = Category::query()
             ->whereHas('products', function ($query) {
                 $query->where('is_active', true)->where('stock', '>', 0);
@@ -67,6 +90,7 @@ class LandingPage extends Component
             ->get();
 
         return view('livewire.landing-page', [
+            'activePromotions' => $activePromotions,
             'storeCategories' => $storeCategories,
         ])->layout('layouts.landing');
     }

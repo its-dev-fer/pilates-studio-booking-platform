@@ -99,6 +99,56 @@
         </div>
     </section>
 
+    @if($activePromotions->isNotEmpty())
+        <section id="promociones" class="border-t border-stone-200/80 bg-linear-to-b from-amber-50 to-[rgb(255,255,253)] py-12 sm:py-14">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-8 text-center">
+                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Promociones activas</p>
+                    <h2 class="mt-2 text-2xl font-black text-stone-900 sm:text-3xl">Aprovecha estos paquetes en oferta</h2>
+                    <p class="mx-auto mt-3 max-w-2xl text-sm text-stone-600 sm:text-base">
+                        Estas promociones se aplican automáticamente al pagar en línea o al solicitar compra por transferencia/efectivo.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    @foreach($activePromotions as $promo)
+                        <article class="rounded-2xl border border-amber-200 bg-white p-5 shadow-sm">
+                            <div class="mb-3 inline-flex rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
+                                Oferta vigente
+                            </div>
+
+                            <h3 class="text-xl font-black text-stone-900">{{ $promo['package_name'] }}</h3>
+                            <p class="mt-1 text-sm text-stone-600">{{ $promo['credits_amount'] }} créditos</p>
+
+                            <div class="mt-4">
+                                <p class="text-sm text-stone-500 line-through">${{ number_format($promo['base_price'], 2) }} MXN</p>
+                                <p class="text-3xl font-black text-primary">${{ number_format($promo['final_price'], 2) }} MXN</p>
+                            </div>
+
+                            <p class="mt-3 text-xs font-medium text-stone-700">
+                                @if($promo['type'] === 'percent')
+                                    Descuento del {{ rtrim(rtrim(number_format((float) $promo['discount_percent'], 2), '0'), '.') }}%
+                                @else
+                                    Precio fijo promocional
+                                @endif
+                            </p>
+
+                            <p class="mt-1 text-xs text-stone-500">
+                                Vigente hasta {{ $promo['ends_at']->format('d/m/Y H:i') }}
+                            </p>
+                        </article>
+                    @endforeach
+                </div>
+
+                <div class="mt-8 text-center">
+                    <a href="/comprar-creditos" class="inline-flex items-center justify-center rounded-full bg-primary px-7 py-3 text-sm font-bold text-[rgb(255,255,253)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_-12px_rgba(94,107,88,0.45)]">
+                        Ver paquetes y comprar
+                    </a>
+                </div>
+            </div>
+        </section>
+    @endif
+
     <section id="clases" class="relative border-t border-stone-200/80 bg-stone-100/60 py-16 sm:py-20 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center sm:mb-16">

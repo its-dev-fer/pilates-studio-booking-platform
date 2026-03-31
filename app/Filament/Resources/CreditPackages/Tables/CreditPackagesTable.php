@@ -15,13 +15,18 @@ class CreditPackagesTable
     {
         return $table
             ->columns([
-               TextColumn::make('name')->searchable(),
+                TextColumn::make('name')->searchable(),
                 TextColumn::make('credits_amount')->label('Créditos')->sortable()->badge(),
                 TextColumn::make('price')->money('mxn')->sortable(),
                 IconColumn::make('is_one_time_purchase')
                     ->label('Compra única')
                     ->boolean(),
-                TextColumn::make('stripe_price_id')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('stripe_product_id')
+                    ->label('Stripe producto')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('stripe_price_id')
+                    ->label('Stripe precio base')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

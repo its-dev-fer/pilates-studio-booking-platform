@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\CreditPackage;
 use App\Models\CreditPackagePurchase;
+use App\Models\CreditPurchaseRequest;
 use App\Models\UserCredit;
+use App\Support\CreditPackagePromotionPricing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class CheckoutController extends Controller
 {
@@ -16,6 +19,32 @@ class CheckoutController extends Controller
      */
     public function process(Request $request, CreditPackage $package)
     {
+        if ($request->user()->hasRole(['admin', 'empleado'])) {
+            return redirect('/dashboard');
+        }
+
+        $hasPendingRequest = CreditPurchaseRequest::query()
+            ->where('user_id', $request->user()->id)
+            ->where('status', CreditPurchaseRequest::STATUS_PENDING)
+            ->exists();
+
+        if ($hasPendingRequest) {
+            return redirect()
+                ->route('checkout.credits')
+                ->with('error', 'Ya tienes una solicitud pendiente. Espera la validación antes de realizar otra compra.');
+        }
+
+        $activeCredits = $request->user()->credits()
+            ->where('balance', '>', 0)
+            ->where('expires_at', '>', now())
+            ->sum('balance');
+
+        if ($activeCredits > 0) {
+            return redirect()
+                ->route('checkout.credits')
+                ->with('error', 'No puedes comprar otro paquete mientras tengas créditos activos.');
+        }
+
         $alreadyPurchased = $package->is_one_time_purchase
             && CreditPackagePurchase::query()
                 ->where('user_id', $request->user()->id)
@@ -28,9 +57,16 @@ class CheckoutController extends Controller
                 ->with('error', 'Este paquete es de compra única y ya fue adquirido en tu cuenta.');
         }
 
-        // Se utiliza el método checkout de Cashier para cobros únicos
-        return $request->user()->checkout([$package->stripe_price_id => 1], [
-            'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&package_id=' . $package->id,
+        try {
+            $items = CreditPackagePromotionPricing::checkoutLineItems($package, now());
+        } catch (Throwable $e) {
+            return redirect()
+                ->route('checkout.credits')
+                ->with('error', $e->getMessage());
+        }
+
+        return $request->user()->checkout($items, [
+            'success_url' => route('checkout.success').'?session_id={CHECKOUT_SESSION_ID}&package_id='.$package->id,
             'cancel_url' => route('checkout.cancel'),
         ]);
     }
@@ -61,6 +97,7 @@ class CheckoutController extends Controller
 
                 if (! $purchase->wasRecentlyCreated) {
                     $alreadyPurchased = true;
+
                     return;
                 }
             }

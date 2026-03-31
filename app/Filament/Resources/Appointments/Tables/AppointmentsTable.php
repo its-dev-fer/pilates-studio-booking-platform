@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Appointments\Tables;
 
 use App\Models\Appointment;
 use App\Models\UserCredit;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
@@ -13,6 +14,7 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class AppointmentsTable
 {
@@ -89,19 +91,19 @@ class AppointmentsTable
                     ->color('success')
                     ->visible(function (Appointment $record) {
                         // Solo visible si está pendiente o requiere cobro
-                        if (!in_array($record->check_in_status, ['pendiente', 'cobrar_al_llegar'])) {
+                        if (! in_array($record->check_in_status, ['pendiente', 'cobrar_al_llegar'])) {
                             return false;
                         }
 
                         // Calcular diferencia en minutos. (false permite números negativos si ya pasó la hora)
-                        $appointmentTime = \Carbon\Carbon::parse($record->date->format('Y-m-d') . ' ' . $record->time_slot);
+                        $appointmentTime = Carbon::parse($record->date->format('Y-m-d').' '.$record->time_slot);
                         $diffInMinutes = now()->diffInMinutes($appointmentTime, false);
 
                         // Visible desde 20 minutos antes de la clase en adelante
                         return $diffInMinutes <= 20;
                     })
                     ->form(function (Appointment $record) {
-                        $appointmentTime = \Carbon\Carbon::parse($record->date->format('Y-m-d') . ' ' . $record->time_slot);
+                        $appointmentTime = Carbon::parse($record->date->format('Y-m-d').' '.$record->time_slot);
                         $diffInMinutes = now()->diffInMinutes($appointmentTime, false);
 
                         // Si es menor a -30, significa que ya pasaron 30 minutos o más
@@ -112,7 +114,7 @@ class AppointmentsTable
                             // Mensaje de alerta si requiere cobro
                             Placeholder::make('alerta_cobro')
                                 ->hidden(! $requiresPayment)
-                                ->content(new \Illuminate\Support\HtmlString('<span class="text-red-600 font-bold">¡ATENCIÓN! Esta cita se agendó sin créditos. Debes cobrar la sesión (efectivo/terminal) antes de darle acceso al cliente.</span>')),
+                                ->content(new HtmlString('<span class="text-red-600 font-bold">¡ATENCIÓN! Esta cita se agendó sin créditos. Debes cobrar la sesión (efectivo/terminal) antes de darle acceso al cliente.</span>')),
 
                             Select::make('new_check_in_status')
                                 ->label('Estado de Asistencia')
@@ -139,7 +141,7 @@ class AppointmentsTable
                                 ->label('Confirmo que he cobrado el monto de esta clase.')
                                 ->visible($requiresPayment)
                                 ->required(fn () => $requiresPayment) // Es obligatorio marcarlo si es visible
-                                ->accepted()
+                                ->accepted(),
                         ];
                     })
                     ->action(function (Appointment $record, array $data) {
@@ -164,34 +166,62 @@ class AppointmentsTable
                     ->requiresConfirmation()
                     ->modalHeading('Confirmar cancelación')
                     ->visible(fn (Appointment $record) => $record->status === 'scheduled')
+                    ->form([
+                        Checkbox::make('return_credit')
+                            ->label('Devolver 1 crédito al cliente')
+                            ->helperText('Solo para administradores.')
+                            ->visible(fn () => auth()->user()->hasRole('admin'))
+                            ->default(function (Appointment $record): bool {
+                                $appointmentTime = Carbon::parse($record->date->format('Y-m-d').' '.$record->time_slot);
+                                $minutesDiff = now()->diffInMinutes($appointmentTime, false);
+
+                                return $minutesDiff >= 360;
+                            }),
+                    ])
                     ->modalDescription(function (Appointment $record) {
-                        $appointmentTime = \Carbon\Carbon::parse($record->date->format('Y-m-d') . ' ' . $record->time_slot);
+                        $appointmentTime = Carbon::parse($record->date->format('Y-m-d').' '.$record->time_slot);
                         $minutesDiff = now()->diffInMinutes($appointmentTime, false); // false para que de negativos si ya pasó
 
-                        if ($minutesDiff >= 120) {
-                            return 'Faltan 2 horas o más para esta clase. Al cancelar, se DEVOLVERÁ 1 crédito al cliente automáticamente. (⚠️ Solo Administradores).';
-                        }
-                        return 'Faltan menos de 2 horas (o la cita ya pasó). Se cancelará el espacio pero NO se devolverá el crédito al cliente.';
-                    })
-                    ->action(function (Appointment $record) {
-                        $appointmentTime = \Carbon\Carbon::parse($record->date->format('Y-m-d') . ' ' . $record->time_slot);
-                        $minutesDiff = now()->diffInMinutes($appointmentTime, false);
-
-                        // ESCENARIO 1: Mayor a 2 horas (120 minutos)
-                        if ($minutesDiff >= 120) {
-                            if (!auth()->user()->hasRole('admin')) {
-                                Notification::make()
-                                    ->title('Permiso Denegado')
-                                    ->body('Solo un Administrador puede cancelar con más de 2 horas de anticipación y devolver créditos.')
-                                    ->danger()
-                                    ->send();
-                                return; // Detiene la ejecución
+                        if (auth()->user()->hasRole('admin')) {
+                            if ($minutesDiff < -15) {
+                                return 'Ya pasó la ventana de cancelación para administración (15 minutos después de la hora de la cita).';
                             }
 
-                            // 1. Cancelar Cita
-                            $record->update(['status' => 'cancelled', 'check_in_status' => 'cancelada_por_administrador', 'checked_in_by' => auth()->id()]);
+                            return 'Como administrador, puedes decidir si se devuelve o no el crédito.';
+                        }
 
-                            // 2. Buscar un paquete de créditos activo para devolverle el saldo
+                        if ($minutesDiff >= 360) {
+                            return 'Faltan 6 horas o más para la cita. Al cancelar, se devolverá 1 crédito automáticamente.';
+                        }
+
+                        return 'Faltan menos de 6 horas (o ya inició). Se cancelará la cita sin devolución de crédito.';
+                    })
+                    ->action(function (Appointment $record, array $data) {
+                        $appointmentTime = Carbon::parse($record->date->format('Y-m-d').' '.$record->time_slot);
+                        $minutesDiff = now()->diffInMinutes($appointmentTime, false);
+                        $isAdmin = auth()->user()->hasRole('admin');
+
+                        if ($isAdmin && $minutesDiff < -15) {
+                            Notification::make()
+                                ->title('Cancelación fuera de tiempo')
+                                ->body('Solo se puede cancelar hasta 15 minutos después de la hora de la cita.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        $record->update([
+                            'status' => 'cancelled',
+                            'check_in_status' => $isAdmin ? 'cancelada_por_administrador' : 'cancelada_por_empleado',
+                            'checked_in_by' => auth()->id(),
+                        ]);
+
+                        $shouldReturnCredit = $isAdmin
+                            ? ((bool) ($data['return_credit'] ?? false))
+                            : ($minutesDiff >= 360);
+
+                        if ($shouldReturnCredit) {
                             $activeCredit = UserCredit::where('user_id', $record->user_id)
                                 ->where('tenant_id', $record->tenant_id)
                                 ->where('expires_at', '>', now())
@@ -201,7 +231,6 @@ class AppointmentsTable
                             if ($activeCredit) {
                                 $activeCredit->increment('balance', 1);
                             } else {
-                                // Si no tenía paquetes activos, le creamos un crédito de cortesía por 30 días
                                 UserCredit::create([
                                     'user_id' => $record->user_id,
                                     'tenant_id' => $record->tenant_id,
@@ -210,21 +239,17 @@ class AppointmentsTable
                                     'is_special' => false,
                                 ]);
                             }
-
-                            Notification::make()
-                                ->title('Cancelación Exitosa')
-                                ->body('El espacio ha sido liberado y se devolvió 1 crédito al cliente.')
-                                ->success()
-                                ->send();
                         } else {
-                            $record->update(['status' => 'cancelled', 'check_in_status' => 'cancelada_por_empleado', 'checked_in_by' => auth()->id()]);
-
-                            Notification::make()
-                                ->title('Cancelación Tardía')
-                                ->body('El espacio ha sido liberado. NO se devolvió el crédito al cliente según la política de 2 horas.')
-                                ->warning()
-                                ->send();
+                            // Sin devolución de crédito por política.
                         }
+
+                        Notification::make()
+                            ->title('Cancelación registrada')
+                            ->body($shouldReturnCredit
+                                ? 'La cita fue cancelada y se devolvió 1 crédito al cliente.'
+                                : 'La cita fue cancelada sin devolución de crédito.')
+                            ->success()
+                            ->send();
                     }),
                 EditAction::make()
                     ->visible(function (Appointment $record) {
@@ -241,7 +266,7 @@ class AppointmentsTable
                         }
 
                         // Si la cita ya pasó, lo ocultamos al empleado
-                        $appointmentTime = \Carbon\Carbon::parse($record->date->format('Y-m-d') . ' ' . $record->time_slot);
+                        $appointmentTime = Carbon::parse($record->date->format('Y-m-d').' '.$record->time_slot);
                         if ($appointmentTime->isPast()) {
                             return false;
                         }

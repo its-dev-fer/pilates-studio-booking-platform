@@ -9,6 +9,7 @@ class CreditPackage extends Model
     protected $fillable = [
         'name',
         'credits_amount',
+        'stripe_product_id',
         'stripe_price_id',
         'price',
         'is_one_time_purchase',
@@ -26,5 +27,10 @@ class CreditPackage extends Model
     public function purchases()
     {
         return $this->hasMany(CreditPackagePurchase::class);
+    }
+
+    public function promotions()
+    {
+        return $this->hasMany(CreditPackagePromotion::class, 'credit_package_id');
     }
 }

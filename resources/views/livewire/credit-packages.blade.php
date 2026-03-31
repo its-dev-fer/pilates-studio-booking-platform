@@ -20,6 +20,18 @@
             </p>
         </div>
 
+        @if (session('success'))
+            <div class="mx-auto mb-6 max-w-3xl rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="mx-auto mb-6 max-w-3xl rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                {{ session('error') }}
+            </div>
+        @endif
+
         @if($activeCredits > 0)
             <div class="mx-auto mb-12 max-w-3xl rounded-2xl border border-tertiary/50 bg-tertiary/20 p-6 shadow-sm">
                 <div class="flex items-start">
@@ -27,6 +39,18 @@
                     <div>
                         <h3 class="text-lg font-bold text-stone-900">Ya tienes créditos activos</h3>
                         <p class="mt-1 text-sm text-stone-700 sm:text-base">Actualmente tienes <strong class="text-primary">{{ $activeCredits }} créditos disponibles</strong>. Según nuestras políticas, solo puedes adquirir un nuevo paquete cuando tus créditos actuales se hayan agotado por completo.</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if($hasPendingPurchaseRequest)
+            <div class="mx-auto mb-12 max-w-3xl rounded-2xl border border-amber-300 bg-amber-50 p-6 shadow-sm">
+                <div class="flex items-start">
+                    <svg class="mr-3 h-6 w-6 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z"></path></svg>
+                    <div>
+                        <h3 class="text-lg font-bold text-amber-900">Tienes una solicitud pendiente</h3>
+                        <p class="mt-1 text-sm text-amber-800 sm:text-base">Tus opciones de compra están deshabilitadas hasta que un administrador o empleado valide tu pago.</p>
                     </div>
                 </div>
             </div>
@@ -40,6 +64,7 @@
         @else
         <div class="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             @foreach($packages as $package)
+            @php($p = $pricingByPackageId[$package->id] ?? null)
             <div class="group relative overflow-hidden rounded-3xl border border-stone-200/90 bg-[rgb(255,255,253)] p-6 shadow-md shadow-stone-900/5 transition duration-300 hover:-translate-y-1 hover:border-tertiary/40 hover:shadow-[0_24px_50px_-28px_rgba(94,107,88,0.15)] sm:p-8">
                 <div class="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-tertiary/30 blur-2xl"></div>
                 <div class="relative flex h-full flex-col justify-between">
@@ -49,10 +74,21 @@
                                 Compra única
                             </span>
                         @endif
+                        @if($p && ($p['promotion'] ?? null))
+                            <span class="mb-4 inline-flex rounded-full border border-amber-400/60 bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-900">
+                                Promoción activa
+                            </span>
+                        @endif
                         <h3 class="mb-4 text-center text-2xl font-black text-stone-900">{{ $package->name }}</h3>
                         <div class="mb-6 text-center">
-                            <span class="text-5xl font-black tracking-tight text-stone-900">${{ number_format($package->price, 2) }}</span>
-                            <span class="ml-1 text-base font-semibold text-stone-500">MXN</span>
+                            @if($p && ($p['promotion'] ?? null) && abs($p['base_price'] - $p['final_price']) > 0.009)
+                                <div class="text-lg font-semibold text-stone-500 line-through">${{ number_format($p['base_price'], 2) }} MXN</div>
+                                <span class="text-5xl font-black tracking-tight text-primary">${{ number_format($p['final_price'], 2) }}</span>
+                                <span class="ml-1 text-base font-semibold text-stone-500">MXN</span>
+                            @else
+                                <span class="text-5xl font-black tracking-tight text-stone-900">${{ number_format($p['final_price'] ?? $package->price, 2) }}</span>
+                                <span class="ml-1 text-base font-semibold text-stone-500">MXN</span>
+                            @endif
                         </div>
 
                         <div class="mb-6 rounded-2xl border border-primary/25 bg-primary/10 p-4 text-center">
@@ -77,14 +113,34 @@
                         </ul>
                     </div>
 
-                    @if($activeCredits > 0)
+                    @if($activeCredits > 0 || $hasPendingPurchaseRequest)
                         <button type="button" disabled class="block w-full cursor-not-allowed rounded-xl border border-stone-200 bg-stone-100 px-6 py-3 text-center text-sm font-bold text-stone-400">
                             No disponible
                         </button>
                     @else
-                        <a href="{{ route('checkout.process', $package->id) }}" class="block w-full rounded-xl bg-primary px-6 py-3 text-center text-sm font-bold text-[rgb(255,255,253)] shadow-md transition hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-14px_rgba(94,107,88,0.45)]">
-                            Comprar paquete
-                        </a>
+                        <div class="space-y-3">
+                            <a href="{{ route('checkout.process', $package->id) }}" class="block w-full rounded-xl bg-primary px-6 py-3 text-center text-sm font-bold text-[rgb(255,255,253)] shadow-md transition hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-14px_rgba(94,107,88,0.45)]">
+                                Pagar con tarjeta (Stripe)
+                            </a>
+                            <button
+                                type="button"
+                                wire:click="requestManualPurchase({{ $package->id }}, 'transfer')"
+                                wire:loading.attr="disabled"
+                                wire:target="requestManualPurchase"
+                                class="block w-full rounded-xl border border-primary/35 bg-white px-6 py-3 text-center text-sm font-bold text-primary transition hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Pagar por transferencia
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="requestManualPurchase({{ $package->id }}, 'cash')"
+                                wire:loading.attr="disabled"
+                                wire:target="requestManualPurchase"
+                                class="block w-full rounded-xl border border-stone-300 bg-white px-6 py-3 text-center text-sm font-bold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Pagar por efectivo
+                            </button>
+                        </div>
                     @endif
                 </div>
             </div>
