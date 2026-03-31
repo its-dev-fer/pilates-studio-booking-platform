@@ -12,6 +12,8 @@ class CreditPackage extends Model
         'stripe_product_id',
         'stripe_price_id',
         'price',
+        'has_new_customer_price',
+        'new_customer_price',
         'is_one_time_purchase',
     ];
 
@@ -19,7 +21,9 @@ class CreditPackage extends Model
     {
         return [
             'price' => 'decimal:2',
+            'new_customer_price' => 'decimal:2',
             'credits_amount' => 'integer',
+            'has_new_customer_price' => 'boolean',
             'is_one_time_purchase' => 'boolean',
         ];
     }

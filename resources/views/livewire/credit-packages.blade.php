@@ -79,6 +79,11 @@
                                 Promoción activa
                             </span>
                         @endif
+                        @if($p && ($p['applied_label'] ?? null) === 'Precio nuevo cliente')
+                            <span class="mb-4 inline-flex rounded-full border border-emerald-400/60 bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-900">
+                                Precio por ser cliente nuevo
+                            </span>
+                        @endif
                         <h3 class="mb-4 text-center text-2xl font-black text-stone-900">{{ $package->name }}</h3>
                         <div class="mb-6 text-center">
                             @if($p && ($p['promotion'] ?? null) && abs($p['base_price'] - $p['final_price']) > 0.009)
@@ -88,6 +93,9 @@
                             @else
                                 <span class="text-5xl font-black tracking-tight text-stone-900">${{ number_format($p['final_price'] ?? $package->price, 2) }}</span>
                                 <span class="ml-1 text-base font-semibold text-stone-500">MXN</span>
+                            @endif
+                            @if($p && ($p['applied_label'] ?? null))
+                                <p class="mt-2 text-xs font-semibold text-stone-600">{{ $p['applied_label'] }}</p>
                             @endif
                         </div>
 
@@ -113,7 +121,11 @@
                         </ul>
                     </div>
 
-                    @if($activeCredits > 0 || $hasPendingPurchaseRequest)
+                    @if($hasPendingPurchaseRequest)
+                        <div class="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-medium text-amber-900">
+                            Tienes una solicitud pendiente. No puedes realizar otra compra hasta que sea revisada.
+                        </div>
+                    @elseif($activeCredits > 0)
                         <button type="button" disabled class="block w-full cursor-not-allowed rounded-xl border border-stone-200 bg-stone-100 px-6 py-3 text-center text-sm font-bold text-stone-400">
                             No disponible
                         </button>

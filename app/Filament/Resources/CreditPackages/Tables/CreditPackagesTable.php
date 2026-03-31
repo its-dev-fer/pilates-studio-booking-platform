@@ -18,6 +18,13 @@ class CreditPackagesTable
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('credits_amount')->label('Créditos')->sortable()->badge(),
                 TextColumn::make('price')->money('mxn')->sortable(),
+                IconColumn::make('has_new_customer_price')
+                    ->label('Precio para nuevos clientes?')
+                    ->boolean(),
+                TextColumn::make('new_customer_price')
+                    ->label('Precio para nuevos clientes')
+                    ->money('mxn')
+                    ->placeholder('—'),
                 IconColumn::make('is_one_time_purchase')
                     ->label('Compra única')
                     ->boolean(),

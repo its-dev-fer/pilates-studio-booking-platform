@@ -41,8 +41,8 @@ class LandingPage extends Component
     public function mount()
     {
         $this->tenants = Tenant::all();
-        // Límite: Solo el mes en curso
-        $this->maxDate = Carbon::now()->endOfMonth()->format('Y-m-d');
+        // Ventana de reserva: próximos 30 días.
+        $this->maxDate = Carbon::now()->addDays(30)->format('Y-m-d');
     }
 
     // Se dispara cuando el usuario cambia la fecha o la sucursal
@@ -106,7 +106,7 @@ class LandingPage extends Component
         $today = Carbon::now();
         $capacity = $tenant->capacity_per_slot ?? 5;
 
-        if ($date->gt($today->copy()->endOfMonth()) || $date->lt($today->copy()->startOfDay())) {
+        if ($date->gt($today->copy()->addDays(30)->endOfDay()) || $date->lt($today->copy()->startOfDay())) {
             $this->availableSlots = [];
 
             return;
@@ -172,7 +172,7 @@ class LandingPage extends Component
     {
         $this->validate([
             'selectedTenant' => 'required',
-            'selectedDate' => 'required|date',
+            'selectedDate' => 'required|date|after_or_equal:today|before_or_equal:'.$this->maxDate,
             'selectedSlot' => 'required',
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',

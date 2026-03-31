@@ -72,15 +72,15 @@
                                         type="button"
                                         wire:click="bookClass('{{ $day['date_raw'] }}', '{{ $slot['time_raw'] }}')"
                                         wire:confirm="¿Seguro que deseas reservar la clase del {{ $day['dayName'] }} a las {{ $slot['time_formatted'] }}? Se descontará 1 crédito de tu paquete activo."
-                                        class="w-full flex flex-col items-center justify-center py-3 px-2 mb-2 mx-1 rounded-xl border text-center transition-all duration-200 hover:scale-105 hover:shadow-md cursor-pointer group
+                                        class="w-full relative overflow-hidden flex flex-col items-center justify-center py-3 px-2 mb-2 mx-1 rounded-xl border text-center transition-all duration-200 hover:shadow-md cursor-pointer group
                                         {{ $slot['color'] === 'emerald' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-400 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400' : '' }}
                                         {{ $slot['color'] === 'amber' ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100 hover:border-amber-400 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400' : '' }}
                                     ">
-                                        <span class="text-sm font-semibold mb-0.5 group-hover:hidden">{{ $slot['time_formatted'] }}</span>
-                                        <span class="text-xs group-hover:hidden">{{ $slot['available'] }} libres</span>
-                                        
-                                        {{-- Texto que aparece al hacer hover en PC --}}
-                                        <span class="hidden group-hover:block font-bold text-sm tracking-wide">¡Reservar!</span>
+                                        <span class="text-sm font-semibold mb-0.5 transition-opacity duration-150 md:group-hover:opacity-0">{{ $slot['time_formatted'] }}</span>
+                                        <span class="text-xs transition-opacity duration-150 md:group-hover:opacity-0">{{ $slot['available'] }} libres</span>
+                                        <span class="pointer-events-none absolute inset-0 hidden items-center justify-center rounded-xl bg-black/10 text-sm font-bold tracking-wide opacity-0 transition-opacity duration-150 group-hover:opacity-100 md:flex">
+                                            ¡Reservar!
+                                        </span>
                                     </button>
                                 @endif
                             @empty

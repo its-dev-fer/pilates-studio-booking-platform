@@ -49,7 +49,7 @@ class CreditPackages extends Component
 
         $this->pricingByPackageId = [];
         foreach ($this->packages as $package) {
-            $this->pricingByPackageId[$package->id] = CreditPackagePromotionPricing::resolve($package);
+            $this->pricingByPackageId[$package->id] = CreditPackagePromotionPricing::resolve($package, now(), $user);
         }
 
         $this->activeCredits = $user->credits()
@@ -134,7 +134,7 @@ class CreditPackages extends Component
         }
 
         $pendingAppointment = session('pending_appointment');
-        $pricing = CreditPackagePromotionPricing::resolve($package);
+        $pricing = CreditPackagePromotionPricing::resolve($package, now(), $user);
 
         CreditPurchaseRequest::create([
             'user_id' => $user->id,
@@ -147,6 +147,9 @@ class CreditPackages extends Component
             'requested_date' => $pendingAppointment['date'] ?? null,
             'requested_time_slot' => $pendingAppointment['time_slot'] ?? null,
         ]);
+
+        // Update component state immediately so purchase actions hide without page reload.
+        $this->hasPendingPurchaseRequest = true;
 
         session()->flash(
             'success',

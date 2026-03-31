@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 use Laravel\Cashier\Billable;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -103,6 +104,35 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function creditPurchaseRequests(): HasMany
+    {
+        return $this->hasMany(CreditPurchaseRequest::class);
+    }
+
+    public function creditPackagePurchases(): HasMany
+    {
+        return $this->hasMany(CreditPackagePurchase::class);
+    }
+
+    public function isNewCreditCustomer(?Carbon $at = null): bool
+    {
+        $at ??= now();
+
+        if (! $this->created_at || $this->created_at->lt($at->copy()->subDays(7))) {
+            return false;
+        }
+
+        $hasPurchasedBefore = $this->credits()
+            ->where('is_special', false)
+            ->exists()
+            || $this->creditPurchaseRequests()
+                ->where('status', CreditPurchaseRequest::STATUS_APPROVED)
+                ->exists()
+            || $this->creditPackagePurchases()->exists();
+
+        return ! $hasPurchasedBefore;
     }
 
     /**

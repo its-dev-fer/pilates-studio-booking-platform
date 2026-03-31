@@ -58,7 +58,7 @@ class CheckoutController extends Controller
         }
 
         try {
-            $items = CreditPackagePromotionPricing::checkoutLineItems($package, now());
+            $items = CreditPackagePromotionPricing::checkoutLineItems($package, now(), $request->user());
         } catch (Throwable $e) {
             return redirect()
                 ->route('checkout.credits')

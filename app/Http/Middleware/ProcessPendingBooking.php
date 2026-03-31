@@ -79,6 +79,11 @@ class ProcessPendingBooking
                     ->persistent()
                     ->send();
 
+                session(['pending_appointment' => [
+                    'tenant_id' => $booking['tenant_id'] ?? null,
+                    'date' => $booking['date'] ?? null,
+                    'time_slot' => $booking['time_slot'] ?? null,
+                ]]);
                 session()->forget('pending_booking');
                 
                 // Redirigimos directamente a la vista de compra

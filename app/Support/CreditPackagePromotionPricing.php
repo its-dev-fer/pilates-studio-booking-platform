@@ -4,14 +4,21 @@ namespace App\Support;
 
 use App\Models\CreditPackage;
 use App\Models\CreditPackagePromotion;
+use App\Models\User;
 use Carbon\Carbon;
 
 class CreditPackagePromotionPricing
 {
     /**
-     * @return array{base_price: float, final_price: float, promotion: ?CreditPackagePromotion}
+     * @return array{
+     *     base_price: float,
+     *     final_price: float,
+     *     promotion: ?CreditPackagePromotion,
+     *     applied_label: ?string,
+     *     has_new_customer_price: bool
+     * }
      */
-    public static function resolve(CreditPackage $package, ?Carbon $at = null): array
+    public static function resolve(CreditPackage $package, ?Carbon $at = null, ?User $user = null): array
     {
         $at ??= now();
         $base = (float) $package->price;
@@ -25,10 +32,15 @@ class CreditPackagePromotionPricing
             ->first();
 
         if (! $promotion) {
+            $newCustomerPrice = self::resolveNewCustomerPrice($package, $user);
+            $final = $newCustomerPrice ?? $base;
+
             return [
                 'base_price' => $base,
-                'final_price' => $base,
+                'final_price' => $final,
                 'promotion' => null,
+                'applied_label' => $newCustomerPrice !== null ? 'Precio nuevo cliente' : null,
+                'has_new_customer_price' => $newCustomerPrice !== null,
             ];
         }
 
@@ -42,10 +54,24 @@ class CreditPackagePromotionPricing
 
         $final = max(0.01, $final);
 
+        $newCustomerPrice = self::resolveNewCustomerPrice($package, $user);
+        if ($newCustomerPrice !== null && $newCustomerPrice < $final) {
+            $final = $newCustomerPrice;
+            $appliedLabel = 'Precio nuevo cliente';
+            $hasNewCustomerPrice = true;
+        } else {
+            $appliedLabel = $promotion->type === CreditPackagePromotion::TYPE_PERCENT
+                ? 'Promoción por porcentaje'
+                : 'Promoción por precio fijo';
+            $hasNewCustomerPrice = $newCustomerPrice !== null;
+        }
+
         return [
             'base_price' => $base,
             'final_price' => $final,
             'promotion' => $promotion,
+            'applied_label' => $appliedLabel,
+            'has_new_customer_price' => $hasNewCustomerPrice,
         ];
     }
 
@@ -54,13 +80,12 @@ class CreditPackagePromotionPricing
      *
      * @return array<int|string, mixed>
      */
-    public static function checkoutLineItems(CreditPackage $package, ?Carbon $at = null): array
+    public static function checkoutLineItems(CreditPackage $package, ?Carbon $at = null, ?User $user = null): array
     {
-        $pricing = self::resolve($package, $at);
-        $hasPromo = $pricing['promotion'] !== null
-            && abs($pricing['final_price'] - $pricing['base_price']) > 0.001;
+        $pricing = self::resolve($package, $at, $user);
+        $hasCustomPrice = abs($pricing['final_price'] - $pricing['base_price']) > 0.001;
 
-        if ($hasPromo) {
+        if ($hasCustomPrice) {
             return [self::stripeLineItem($package, $pricing['final_price'])];
         }
 
@@ -100,5 +125,16 @@ class CreditPackagePromotionPricing
         }
 
         return $line;
+    }
+
+    private static function resolveNewCustomerPrice(CreditPackage $package, ?User $user): ?float
+    {
+        if (! $user || ! $package->has_new_customer_price || ! $user->isNewCreditCustomer()) {
+            return null;
+        }
+
+        $price = (float) $package->new_customer_price;
+
+        return $price > 0 ? round($price, 2) : null;
     }
 }

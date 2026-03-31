@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Tenants\Schemas;
 
+use Closure;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -36,6 +37,29 @@ class TenantForm
                         ->label('Dirección Física')
                         ->maxLength(65535)
                         ->columnSpanFull(),
+                    TextInput::make('transfer_account_number')
+                        ->label('Cuenta para transferencias')
+                        ->maxLength(23)
+                        ->live(onBlur: true)
+                        ->formatStateUsing(fn (?string $state): ?string => self::formatTransferAccountNumber($state))
+                        ->afterStateUpdated(function (?string $state, Set $set): void {
+                            $formatted = self::formatTransferAccountNumber($state);
+
+                            if ($formatted !== $state) {
+                                $set('transfer_account_number', $formatted);
+                            }
+                        })
+                        ->dehydrateStateUsing(fn (?string $state): ?string => self::digitsOnly($state))
+                        ->rule(function (): Closure {
+                            return function (string $attribute, mixed $value, Closure $fail): void {
+                                $digits = strlen(self::digitsOnly((string) $value));
+
+                                if ($digits < 16 || $digits > 18) {
+                                    $fail('La cuenta para transferencias debe contener entre 16 y 18 dígitos.');
+                                }
+                            };
+                        })
+                        ->helperText('Opcional. Debe contener entre 16 y 18 dígitos.'),
                 ])->columns(2),
 
                 Section::make('Configuraciones Operativas')->schema([
@@ -85,5 +109,25 @@ class TenantForm
                         ->maxItems(7),
                     ])->columns(2),
             ]);
+    }
+
+    protected static function digitsOnly(?string $value): string
+    {
+        return preg_replace('/\D+/', '', $value ?? '') ?? '';
+    }
+
+    protected static function formatTransferAccountNumber(?string $value): string
+    {
+        $digits = substr(self::digitsOnly($value), 0, 18);
+
+        if ($digits === '') {
+            return '';
+        }
+
+        if (strlen($digits) <= 16) {
+            return trim(chunk_split($digits, 4, ' '));
+        }
+
+        return trim(chunk_split($digits, 3, ' '));
     }
 }
