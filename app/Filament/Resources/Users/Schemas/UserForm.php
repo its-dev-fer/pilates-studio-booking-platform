@@ -32,6 +32,7 @@ class UserForm
                     TextInput::make('phone')
                         ->label('Teléfono')
                         ->tel()
+                        ->required()
                         ->maxLength(10),
                     TextInput::make('password')
                         ->label('Nueva contraseña')
