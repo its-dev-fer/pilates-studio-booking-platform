@@ -34,8 +34,13 @@ class UserForm
                         ->tel()
                         ->maxLength(10),
                     TextInput::make('password')
-                        ->dehydrated(fn ($state) => filled($state))
-                        ->required(fn (string $context): bool => $context === 'edit')
+                        ->label('Nueva contraseña')
+                        ->password()
+                        ->revealable()
+                        ->helperText('Al editar, déjala vacía para no cambiar la contraseña actual.')
+                        ->maxLength(255)
+                        ->dehydrated(fn (?string $state): bool => filled($state))
+                        ->rules(['nullable', 'string', 'min:8'])
                         ->hiddenOn('create'),
                 ])->columns(2),
 
