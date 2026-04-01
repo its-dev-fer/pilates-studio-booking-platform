@@ -32,8 +32,15 @@ class WelcomeUserMail extends Mailable
      */
     public function content(): Content
     {
+        $loginUrl = $this->user->hasRole('cliente')
+            ? url('/clientes/login')
+            : url('/dashboard/login');
+
         return new Content(
             markdown: 'emails.users.welcome',
+            with: [
+                'loginUrl' => $loginUrl,
+            ],
         );
     }
 

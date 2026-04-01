@@ -12,7 +12,7 @@ A continuación, te proporcionamos tus credenciales de acceso temporal:
 **⚠️ Importante:** Por tu seguridad, te solicitamos que cambies esta contraseña inmediatamente después de iniciar sesión por primera vez.
 </x-mail::panel>
 
-<x-mail::button :url="url('/clientes/login')">
+<x-mail::button :url="$loginUrl">
 Iniciar Sesión Ahora
 </x-mail::button>
 
