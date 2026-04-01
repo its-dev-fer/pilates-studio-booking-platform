@@ -9,6 +9,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Log file retention (logs:prune)
+    |--------------------------------------------------------------------------
+    |
+    | Archivos en storage/logs/*.log con antigüedad mayor a estos días se eliminan
+    | al ejecutar el comando programado logs:prune (ver routes/console.php).
+    |
+    */
+
+    'prune_after_days' => (int) env('LOG_PRUNE_AFTER_DAYS', 15),
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Log Channel
     |--------------------------------------------------------------------------
     |
@@ -54,7 +66,7 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => explode(',', (string) env('LOG_STACK', 'daily')),
             'ignore_exceptions' => false,
         ],
 
@@ -69,7 +81,8 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'days' => env('LOG_DAILY_DAYS', 14),
+            // Archivos rotados por día; Monolog conserva como máximo este número de ficheros.
+            'days' => (int) env('LOG_DAILY_DAYS', 15),
             'replace_placeholders' => true,
         ],
 
