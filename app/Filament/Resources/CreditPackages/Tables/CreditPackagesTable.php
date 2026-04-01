@@ -11,19 +11,31 @@ use Filament\Tables\Table;
 
 class CreditPackagesTable
 {
+    public static function formatPriceColumn(mixed $state): string
+    {
+        if ($state === null || $state === '') {
+            return '—';
+        }
+
+        return '$' . number_format((float) $state, 2, '.', ',');
+    }
+
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('credits_amount')->label('Créditos')->sortable()->badge(),
-                TextColumn::make('price')->money('mxn')->sortable(),
+                TextColumn::make('price')
+                    ->label('Precio')
+                    ->sortable()
+                    ->formatStateUsing(fn (mixed $state): string => self::formatPriceColumn($state)),
                 IconColumn::make('has_new_customer_price')
                     ->label('Precio para nuevos clientes?')
                     ->boolean(),
                 TextColumn::make('new_customer_price')
                     ->label('Precio para nuevos clientes')
-                    ->money('mxn')
+                    ->formatStateUsing(fn (mixed $state): string => self::formatPriceColumn($state))
                     ->placeholder('—'),
                 IconColumn::make('is_one_time_purchase')
                     ->label('Compra única')
