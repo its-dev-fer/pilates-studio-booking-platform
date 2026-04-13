@@ -3,6 +3,7 @@
 use App\Http\Controllers\CheckoutController;
 use App\Livewire\Checkout;
 use App\Livewire\CreditPackages;
+use App\Livewire\GuestCreditPackages;
 use App\Livewire\LandingPage;
 use App\Livewire\ProductShow;
 use App\Livewire\ShoppingCart;
@@ -10,6 +11,7 @@ use App\Livewire\StoreFront;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingPage::class)->name('home');
+Route::get('/paquetes-disponibles', GuestCreditPackages::class)->name('credits.guest');
 
 Route::middleware(['auth'])->group(function () {
     // Vista de paquetes

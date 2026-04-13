@@ -141,7 +141,7 @@
                 </div>
 
                 <div class="mt-8 text-center">
-                    <a href="/comprar-creditos" class="inline-flex items-center justify-center rounded-full bg-primary px-7 py-3 text-sm font-bold text-[rgb(255,255,253)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_-12px_rgba(94,107,88,0.45)]">
+                    <a href="/paquetes-disponibles" class="inline-flex items-center justify-center rounded-full bg-primary px-7 py-3 text-sm font-bold text-[rgb(255,255,253)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_-12px_rgba(94,107,88,0.45)]">
                         Ver paquetes y comprar
                     </a>
                 </div>
@@ -456,7 +456,7 @@
             <p class="mx-auto mt-4 text-sm leading-relaxed text-stone-600 sm:text-base">
                 Ofrecemos paquetes de clases de Pilates Reformer para que entrenes según tu ritmo. En recepción te explicamos opciones y vigencia; también puedes usar tus créditos al reservar en línea.
             </p>
-            <a href="/comprar-creditos" class="mt-8 inline-flex items-center justify-center rounded-full bg-primary px-7 py-3 text-sm font-bold text-[rgb(255,255,253)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_-12px_rgba(94,107,88,0.45)]">
+            <a href="/paquetes-disponibles" class="mt-8 inline-flex items-center justify-center rounded-full bg-primary px-7 py-3 text-sm font-bold text-[rgb(255,255,253)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_-12px_rgba(94,107,88,0.45)]">
                 Adquiere tu membresía
             </a>
         </div>

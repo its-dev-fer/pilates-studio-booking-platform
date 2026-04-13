@@ -40,6 +40,7 @@ class ClientPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Client/Resources'), for: 'App\Filament\Client\Resources')
             ->discoverPages(in: app_path('Filament/Client/Pages'), for: 'App\Filament\Client\Pages')
             ->login()
+            ->registration()
             ->globalSearch(false)
             ->sidebarCollapsibleOnDesktop() // Agrega el botón para colapsar el menú y dejar solo los íconos
             ->sidebarWidth('16rem') // Hace el menú un poco más esbelto y elegante (por defecto es muy ancho)
@@ -68,7 +69,7 @@ class ClientPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 function () {
-                    if (! request()->routeIs('filament.clientes.auth.login')) {
+                    if (! request()->routeIs('filament.clientes.auth.login') && ! request()->routeIs('filament.clientes.auth.register')) {
                         return '';
                     }
 
@@ -76,7 +77,7 @@ class ClientPanelProvider extends PanelProvider
                         <style>
                             body {
                                 background-image:
-                                    linear-gradient(rgba(0, 0, 0, 0.26), rgba(0, 0, 0, 0.36)),
+                                    linear-gradient(135deg, rgba(7, 12, 23, 0.58), rgba(7, 12, 23, 0.76)),
                                     url("' . asset('assets/client_bg.jpg') . '");
                                 background-size: cover;
                                 background-position: center;
@@ -84,18 +85,84 @@ class ClientPanelProvider extends PanelProvider
                                 background-attachment: fixed;
                             }
 
+                            body::before {
+                                content: "";
+                                position: fixed;
+                                inset: 0;
+                                pointer-events: none;
+                                background:
+                                    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 52%),
+                                    radial-gradient(circle at 84% 80%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 45%);
+                                z-index: 0;
+                            }
+
                             .fi-simple-main-ctn,
                             .fi-simple-main {
                                 animation: loginCardEnter 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
                             }
 
+                            .fi-simple-main-ctn {
+                                position: relative;
+                                z-index: 1;
+                            }
+
                             .fi-simple-main {
-                                box-shadow: 0 24px 56px -26px rgba(0, 0, 0, 0.55) !important;
+                                background: linear-gradient(140deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.16)) !important;
+                                border: 1px solid rgba(255, 255, 255, 0.34) !important;
+                                border-radius: 1.1rem !important;
+                                box-shadow:
+                                    0 30px 65px -30px rgba(0, 0, 0, 0.72),
+                                    inset 0 1px 0 rgba(255, 255, 255, 0.32) !important;
+                                backdrop-filter: blur(14px) saturate(130%);
+                                -webkit-backdrop-filter: blur(14px) saturate(130%);
+                            }
+
+                            .fi-simple-main .fi-simple-header-heading,
+                            .fi-simple-main .fi-simple-header-subheading,
+                            .fi-simple-main .fi-input-wrp-label,
+                            .fi-simple-main .fi-fo-field-wrp-label span,
+                            .fi-simple-main .fi-link {
+                                color: rgba(255, 255, 255, 0.96) !important;
+                                text-shadow: 0 1px 10px rgba(0, 0, 0, 0.30);
+                            }
+
+                            .fi-simple-main label,
+                            .fi-simple-main .fi-fo-field-wrp-label,
+                            .fi-simple-main .fi-fo-field-wrp-label > span,
+                            .fi-simple-main .fi-fo-field-label-content,
+                            .fi-simple-main .fi-checkbox-list-option-label,
+                            .fi-simple-main .fi-fo-checkbox-list-option-label,
+                            .fi-simple-main .fi-fo-field-wrp-hint,
+                            .fi-simple-main .fi-fo-field-wrp-helper-text,
+                            .fi-simple-main .fi-input-wrp-prefix,
+                            .fi-simple-main .fi-input-wrp-suffix {
+                                color: rgba(248, 250, 252, 0.96) !important;
+                            }
+
+                            .fi-simple-main .fi-input-wrp,
+                            .fi-simple-main .fi-select-input,
+                            .fi-simple-main input {
+                                background: rgba(255, 255, 255, 0.23) !important;
+                                border-color: rgba(255, 255, 255, 0.34) !important;
+                                color: #f8fafc !important;
+                            }
+
+                            .fi-simple-main input::placeholder {
+                                color: rgba(248, 250, 252, 0.76) !important;
+                            }
+
+                            .fi-simple-main .fi-checkbox-input {
+                                border-color: rgba(255, 255, 255, 0.45) !important;
+                            }
+
+                            .fi-simple-header .fi-logo,
+                            .fi-simple-header .fi-logo img {
+                                filter: brightness(0) invert(1);
                             }
 
                             .fi-simple-main [type="submit"] {
                                 transition: transform 180ms ease, box-shadow 220ms ease, filter 220ms ease;
-                                box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.48);
+                                box-shadow: 0 16px 34px -16px rgba(0, 0, 0, 0.58);
                                 animation: loginButtonPop 540ms ease 180ms both;
                             }
 
