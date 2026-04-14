@@ -108,9 +108,9 @@
                     </div>
                 @endif
 
-                @if($product->description)
+                @if(filled($product->description))
                     <div class="prose prose-stone max-w-none prose-p:text-stone-600 prose-headings:text-stone-900">
-                        {!! $product->description !!}
+                        {!! $product->descriptionHtml() !!}
                     </div>
                 @endif
 

@@ -103,9 +103,6 @@
                 <h1 class="text-4xl font-black leading-tight text-stone-900 sm:text-5xl">
                     {{ $latestProduct->title }}
                 </h1>
-                <p class="max-w-xl text-base leading-relaxed text-stone-600 sm:text-lg">
-                    {{ \Illuminate\Support\Str::limit(strip_tags($latestProduct->description ?? ''), 200) ?: 'Lo más nuevo en la tienda. Llévalo antes de que se agote.' }}
-                </p>
                 <div class="flex flex-wrap items-baseline gap-3">
                     @if($latestProduct->discount_price)
                         <span class="text-lg text-stone-400 line-through">${{ number_format($latestProduct->price, 2) }}</span>
