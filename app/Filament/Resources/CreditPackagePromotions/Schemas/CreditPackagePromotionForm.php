@@ -46,12 +46,11 @@ class CreditPackagePromotionForm
                             ->timezone(config('app.timezone'))
                             ->displayFormat('d/m/Y H:i')
                             ->minutesStep(5)
-                            ->defaultFocusedDate(now())
                             ->closeOnDateSelection(false)
-                            ->minDate(now())
-                            ->rule('after_or_equal:now')
+                            ->minDate(today())
+                            ->rule('after_or_equal:today')
                             ->live()
-                            ->helperText('Zona horaria del servidor / aplicación.'),
+                            ->helperText('Puedes elegir cualquier hora del día de hoy (incluso ya pasada). No se permiten días anteriores. Zona horaria de la aplicación.'),
                         DateTimePicker::make('ends_at')
                             ->label('Fin')
                             ->required()
@@ -61,9 +60,8 @@ class CreditPackagePromotionForm
                             ->timezone(config('app.timezone'))
                             ->displayFormat('d/m/Y H:i')
                             ->minutesStep(5)
-                            ->defaultFocusedDate(now())
                             ->closeOnDateSelection(false)
-                            ->minDate(fn (Get $get): Carbon|string => $get('starts_at') ?: now())
+                            ->minDate(fn (Get $get): Carbon|string => $get('starts_at') ?: today())
                             ->rule('after:starts_at')
                             ->helperText('Debe ser posterior al inicio. La promo deja de aplicar después de esta fecha y hora.'),
                     ]),

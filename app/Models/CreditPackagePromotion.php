@@ -95,6 +95,12 @@ class CreditPackagePromotion extends Model
         ?string $promotionalPrice,
         ?int $ignoreId = null
     ): void {
+        if ($startsAt->copy()->startOfDay()->lt(today()->startOfDay())) {
+            throw ValidationException::withMessages([
+                'starts_at' => 'La fecha de inicio no puede ser anterior a hoy.',
+            ]);
+        }
+
         if ($endsAt->lessThanOrEqualTo($startsAt)) {
             throw ValidationException::withMessages([
                 'ends_at' => 'La fecha y hora de fin debe ser posterior al inicio.',
