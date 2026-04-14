@@ -49,14 +49,11 @@
                                 @endif
                                 <h3 class="mb-4 text-center text-2xl font-black text-stone-900">{{ $package->name }}</h3>
                                 <div class="mb-6 text-center">
-                                    @if($p && ($p['promotion'] ?? null) && abs($p['base_price'] - $p['final_price']) > 0.009)
-                                        <div class="text-lg font-semibold text-stone-500 line-through">${{ number_format($p['base_price'], 2) }} MXN</div>
-                                        <span class="text-5xl font-black tracking-tight text-primary">${{ number_format($p['final_price'], 2) }}</span>
-                                        <span class="ml-1 text-base font-semibold text-stone-500">MXN</span>
-                                    @else
-                                        <span class="text-5xl font-black tracking-tight text-stone-900">${{ number_format($p['final_price'] ?? $package->price, 2) }}</span>
-                                        <span class="ml-1 text-base font-semibold text-stone-500">MXN</span>
-                                    @endif
+                                    <x-credit-package-price-display
+                                        :base-price="($p ?? [])['base_price'] ?? (float) $package->price"
+                                        :final-price="($p ?? [])['final_price'] ?? (float) $package->price"
+                                        variant="card"
+                                    />
                                 </div>
 
                                 <div class="mb-6 rounded-2xl border border-primary/25 bg-primary/10 p-4 text-center">

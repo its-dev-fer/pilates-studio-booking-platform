@@ -121,8 +121,11 @@
                             <p class="mt-1 text-sm text-stone-600">{{ $promo['credits_amount'] }} créditos</p>
 
                             <div class="mt-4">
-                                <p class="text-sm text-stone-500 line-through">${{ number_format($promo['base_price'], 2) }} MXN</p>
-                                <p class="text-3xl font-black text-primary">${{ number_format($promo['final_price'], 2) }} MXN</p>
+                                <x-credit-package-price-display
+                                    :base-price="$promo['base_price']"
+                                    :final-price="$promo['final_price']"
+                                    variant="landing"
+                                />
                             </div>
 
                             <p class="mt-3 text-xs font-medium text-stone-700">

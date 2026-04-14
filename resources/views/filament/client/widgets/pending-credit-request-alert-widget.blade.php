@@ -34,7 +34,11 @@
                     <div class="pending-credit-alert__item">
                         <p class="pending-credit-alert__label">Precio a pagar</p>
                         <p class="pending-credit-alert__value">
-                            ${{ number_format((float) ($this->pendingRequest->quoted_final_price ?? $this->pendingRequest->package?->price ?? 0), 2) }} MXN
+                            <x-credit-package-price-display
+                                :base-price="(float) ($this->pendingRequest->quoted_base_price ?? $this->pendingRequest->quoted_final_price ?? $this->pendingRequest->package?->price ?? 0)"
+                                :final-price="(float) ($this->pendingRequest->quoted_final_price ?? $this->pendingRequest->package?->price ?? 0)"
+                                variant="compact"
+                            />
                         </p>
                     </div>
 

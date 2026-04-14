@@ -10,6 +10,14 @@ use Carbon\Carbon;
 class CreditPackagePromotionPricing
 {
     /**
+     * @param  array{base_price: float, final_price: float}  $pricing
+     */
+    public static function hasDisplayDiscount(array $pricing): bool
+    {
+        return abs($pricing['base_price'] - $pricing['final_price']) > 0.009;
+    }
+
+    /**
      * @return array{
      *     base_price: float,
      *     final_price: float,

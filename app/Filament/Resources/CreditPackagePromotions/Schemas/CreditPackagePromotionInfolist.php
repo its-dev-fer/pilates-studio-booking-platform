@@ -7,6 +7,7 @@ use App\Support\CreditPackagePromotionPricing;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class CreditPackagePromotionInfolist
 {
@@ -19,9 +20,20 @@ class CreditPackagePromotionInfolist
                     ->schema([
                         TextEntry::make('package.name')
                             ->label('Nombre'),
-                        TextEntry::make('package.price')
-                            ->label('Precio base')
-                            ->money('mxn'),
+                        TextEntry::make('package_public_prices')
+                            ->label('Precio base / importe actual')
+                            ->getStateUsing(function (CreditPackagePromotion $record): HtmlString {
+                                $record->loadMissing('package');
+                                $pricing = CreditPackagePromotionPricing::resolve($record->package, now());
+
+                                return new HtmlString(view('components.credit-package-price-display', [
+                                    'basePrice' => $pricing['base_price'],
+                                    'finalPrice' => $pricing['final_price'],
+                                    'variant' => 'infolist',
+                                ])->render());
+                            })
+                            ->html()
+                            ->columnSpanFull(),
                         TextEntry::make('package.credits_amount')
                             ->label('Créditos incluidos'),
                     ]),

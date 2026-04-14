@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\CreditPackages\Tables;
 
+use App\Models\CreditPackage;
+use App\Support\CreditPackagePromotionPricing;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class CreditPackagesTable
 {
@@ -17,7 +20,7 @@ class CreditPackagesTable
             return '—';
         }
 
-        return '$' . number_format((float) $state, 2, '.', ',');
+        return '$'.number_format((float) $state, 2, '.', ',');
     }
 
     public static function configure(Table $table): Table
@@ -27,9 +30,18 @@ class CreditPackagesTable
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('credits_amount')->label('Créditos')->sortable()->badge(),
                 TextColumn::make('price')
-                    ->label('Precio')
+                    ->label('Precio al público')
                     ->sortable()
-                    ->formatStateUsing(fn (mixed $state): string => self::formatPriceColumn($state)),
+                    ->formatStateUsing(function (mixed $state, CreditPackage $record): HtmlString {
+                        $pricing = CreditPackagePromotionPricing::resolve($record, now(), null);
+
+                        return new HtmlString(view('components.credit-package-price-display', [
+                            'basePrice' => $pricing['base_price'],
+                            'finalPrice' => $pricing['final_price'],
+                            'variant' => 'table',
+                        ])->render());
+                    })
+                    ->html(),
                 IconColumn::make('has_new_customer_price')
                     ->label('Precio para nuevos clientes?')
                     ->boolean(),

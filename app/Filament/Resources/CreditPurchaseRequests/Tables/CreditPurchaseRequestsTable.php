@@ -13,6 +13,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 
 class CreditPurchaseRequestsTable
 {
@@ -27,10 +28,26 @@ class CreditPurchaseRequestsTable
                 TextColumn::make('package.name')
                     ->label('Paquete')
                     ->searchable(),
-                TextColumn::make('quoted_final_price')
+                TextColumn::make('quoted_price_display')
                     ->label('Monto cotizado')
-                    ->money('mxn')
-                    ->placeholder('N/A')
+                    ->getStateUsing(function (CreditPurchaseRequest $record): HtmlString {
+                        $final = $record->quoted_final_price ?? $record->package?->price;
+                        if ($final === null || $final === '') {
+                            return new HtmlString('—');
+                        }
+
+                        $final = (float) $final;
+                        $base = $record->quoted_base_price !== null && $record->quoted_base_price !== ''
+                            ? (float) $record->quoted_base_price
+                            : $final;
+
+                        return new HtmlString(view('components.credit-package-price-display', [
+                            'basePrice' => $base,
+                            'finalPrice' => $final,
+                            'variant' => 'table',
+                        ])->render());
+                    })
+                    ->html()
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('payment_method')
                     ->label('Método de pago')

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CreditPackagePromotions\Tables;
 
 use App\Models\CreditPackagePromotion;
+use App\Support\CreditPackagePromotionPricing;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -12,6 +13,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 
 class CreditPackagePromotionsTable
 {
@@ -46,10 +48,19 @@ class CreditPackagePromotionsTable
 
                         return '$'.number_format((float) $record->promotional_price, 2);
                     }),
-                TextColumn::make('package.price')
-                    ->label('Base')
-                    ->money('mxn')
-                    ->sortable(),
+                TextColumn::make('package_public_price')
+                    ->label('Precio al público (hoy)')
+                    ->getStateUsing(function (CreditPackagePromotion $record): HtmlString {
+                        $record->loadMissing('package');
+                        $pricing = CreditPackagePromotionPricing::resolve($record->package, now(), null);
+
+                        return new HtmlString(view('components.credit-package-price-display', [
+                            'basePrice' => $pricing['base_price'],
+                            'finalPrice' => $pricing['final_price'],
+                            'variant' => 'table',
+                        ])->render());
+                    })
+                    ->html(),
                 TextColumn::make('starts_at')
                     ->label('Inicio')
                     ->dateTime('d/m/Y H:i')
