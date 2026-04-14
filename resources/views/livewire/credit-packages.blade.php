@@ -140,15 +140,17 @@
                             >
                                 Pagar por transferencia
                             </button>
-                            <button
-                                type="button"
-                                wire:click="requestManualPurchase({{ $package->id }}, 'cash')"
-                                wire:loading.attr="disabled"
-                                wire:target="requestManualPurchase"
-                                class="block w-full rounded-xl border border-stone-300 bg-white px-6 py-3 text-center text-sm font-bold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                Pagar por efectivo
-                            </button>
+                            @if($allowCashManualPayment)
+                                <button
+                                    type="button"
+                                    wire:click="requestManualPurchase({{ $package->id }}, 'cash')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="requestManualPurchase"
+                                    class="block w-full rounded-xl border border-stone-300 bg-white px-6 py-3 text-center text-sm font-bold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    Pagar por efectivo
+                                </button>
+                            @endif
                         </div>
                     @endif
                 </div>

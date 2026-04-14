@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Laravel\Cashier\Billable;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -116,6 +116,21 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         return $this->hasMany(CreditPackagePurchase::class);
     }
 
+    /**
+     * Si el usuario ya obtuvo créditos de paquete (Stripe, transferencia/efectivo aprobados, o compras registradas).
+     * No cuenta créditos marcados como especiales (p. ej. cortesías manuales).
+     */
+    public function hasAcquiredCreditsBefore(): bool
+    {
+        return $this->credits()
+            ->where('is_special', false)
+            ->exists()
+            || $this->creditPurchaseRequests()
+                ->where('status', CreditPurchaseRequest::STATUS_APPROVED)
+                ->exists()
+            || $this->creditPackagePurchases()->exists();
+    }
+
     public function isNewCreditCustomer(?Carbon $at = null): bool
     {
         $at ??= now();
@@ -124,15 +139,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
             return false;
         }
 
-        $hasPurchasedBefore = $this->credits()
-            ->where('is_special', false)
-            ->exists()
-            || $this->creditPurchaseRequests()
-                ->where('status', CreditPurchaseRequest::STATUS_APPROVED)
-                ->exists()
-            || $this->creditPackagePurchases()->exists();
-
-        return ! $hasPurchasedBefore;
+        return ! $this->hasAcquiredCreditsBefore();
     }
 
     /**

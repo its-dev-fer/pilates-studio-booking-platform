@@ -21,6 +21,9 @@ class CreditPackages extends Component
 
     public $hasPendingPurchaseRequest = false;
 
+    /** Si puede solicitar pago en efectivo (solo a partir de una compra previa de créditos). */
+    public bool $allowCashManualPayment = false;
+
     public function mount()
     {
         /** @var User|null $user */
@@ -61,6 +64,8 @@ class CreditPackages extends Component
             ->where('user_id', $user->id)
             ->where('status', CreditPurchaseRequest::STATUS_PENDING)
             ->exists();
+
+        $this->allowCashManualPayment = $user->hasAcquiredCreditsBefore();
     }
 
     public function requestManualPurchase(int $packageId, string $paymentMethod): void
@@ -75,6 +80,12 @@ class CreditPackages extends Component
 
         if (! in_array($paymentMethod, [CreditPurchaseRequest::METHOD_TRANSFER, CreditPurchaseRequest::METHOD_CASH], true)) {
             session()->flash('error', 'Método de pago inválido.');
+
+            return;
+        }
+
+        if ($paymentMethod === CreditPurchaseRequest::METHOD_CASH && ! $user->hasAcquiredCreditsBefore()) {
+            session()->flash('error', 'El pago en efectivo no está disponible en tu primera compra de créditos. Usa tarjeta o transferencia.');
 
             return;
         }
