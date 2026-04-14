@@ -13,6 +13,21 @@ class EditCreditPackage extends EditRecord
 {
     protected static string $resource = CreditPackageResource::class;
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if ($this->record->getActivePromotion()) {
+            $data['price'] = $this->record->price;
+            $data['has_new_customer_price'] = $this->record->has_new_customer_price;
+            $data['new_customer_price'] = $this->record->new_customer_price;
+        }
+
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

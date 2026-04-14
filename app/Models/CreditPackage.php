@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class CreditPackage extends Model
 {
@@ -36,5 +37,20 @@ class CreditPackage extends Model
     public function promotions()
     {
         return $this->hasMany(CreditPackagePromotion::class, 'credit_package_id');
+    }
+
+    /** Promoción vigente en la fecha indicada (por defecto ahora). */
+    public function getActivePromotion(?Carbon $at = null): ?CreditPackagePromotion
+    {
+        if (! $this->exists) {
+            return null;
+        }
+
+        $at ??= now();
+
+        return $this->promotions()
+            ->where('starts_at', '<=', $at)
+            ->where('ends_at', '>=', $at)
+            ->first();
     }
 }
