@@ -69,6 +69,11 @@
                                     @else
                                         <p style="margin:10px 0 0;font-size:13px;color:{{ $stone600 }};">Referencia / folio de pago: <em>(no registrada en el pedido)</em></p>
                                     @endif
+                                    @if(($order->payment_method ?? null) === 'transferencia')
+                                        <p style="margin:12px 0 0;font-size:14px;color:{{ $stone600 }};"><strong style="color:{{ $stone900 }};">Banco:</strong> {{ $order->tenant?->transfer_bank_name ?? 'No configurado' }}</p>
+                                        <p style="margin:6px 0 0;font-size:14px;color:{{ $stone600 }};"><strong style="color:{{ $stone900 }};">Titular de la cuenta:</strong> {{ $order->tenant?->transfer_account_holder ?? 'No configurado' }}</p>
+                                        <p style="margin:6px 0 0;font-size:14px;color:{{ $stone600 }};"><strong style="color:{{ $stone900 }};">Cuenta para transferencia:</strong> {{ $order->tenant?->transfer_account_number ?? 'No configurada' }}</p>
+                                    @endif
                                 </td>
                             </tr>
                         </table>

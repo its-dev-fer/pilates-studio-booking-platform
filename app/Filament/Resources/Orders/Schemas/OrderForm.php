@@ -112,7 +112,7 @@ class OrderForm
                             ->prefix('$')
                             ->required(),
 
-                        TextInput::make('shipping_cost')
+                        TextInput::make('shipping_fee')
                             ->label('Costo de Envío')
                             ->numeric()
                             ->prefix('$')

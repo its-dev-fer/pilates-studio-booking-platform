@@ -10,6 +10,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use illuminate\Support\Str;
@@ -37,6 +38,61 @@ class TenantForm
                         ->label('Dirección Física')
                         ->maxLength(65535)
                         ->columnSpanFull(),
+                ])->columns(2),
+
+                Section::make('Datos de cuenta bancaria')->schema([
+                    Select::make('transfer_bank_name')
+                        ->label('Banco')
+                        ->searchable()
+                        ->preload()
+                        ->live()
+                        ->options([
+                            'BANAMEX' => 'BANAMEX',
+                            'BANCOMER' => 'BANCOMER',
+                            'BANORTE' => 'BANORTE',
+                            'BBVA' => 'BBVA',
+                            'HSBC' => 'HSBC',
+                            'MERCADO PAGO' => 'MERCADO PAGO',
+                            'NU' => 'NU',
+                            'OTRO BANCO' => 'OTRO BANCO',
+                            'OXXO SPIN' => 'OXXO SPIN',
+                        ])
+                        ->afterStateHydrated(function (?string $state, Set $set): void {
+                            $allowed = [
+                                'BANAMEX',
+                                'BANCOMER',
+                                'BANORTE',
+                                'BBVA',
+                                'HSBC',
+                                'MERCADO PAGO',
+                                'NU',
+                                'OTRO BANCO',
+                                'OXXO SPIN',
+                            ];
+
+                            if (filled($state) && ! in_array($state, $allowed, true)) {
+                                $set('transfer_bank_name_other', $state);
+                                $set('transfer_bank_name', 'OTRO BANCO');
+                            }
+                        })
+                        ->dehydrateStateUsing(fn (?string $state, Get $get): ?string => $state === 'OTRO BANCO'
+                            ? trim((string) ($get('transfer_bank_name_other') ?? ''))
+                            : $state)
+                        ->helperText('Selecciona el banco donde se recibiran transferencias.'),
+
+                    TextInput::make('transfer_bank_name_other')
+                        ->label('Otro banco')
+                        ->maxLength(120)
+                        ->required(fn (Get $get): bool => $get('transfer_bank_name') === 'OTRO BANCO')
+                        ->visible(fn (Get $get): bool => $get('transfer_bank_name') === 'OTRO BANCO')
+                        ->dehydrated(false)
+                        ->helperText('Ingresa el nombre del banco si no aparece en la lista.'),
+
+                    TextInput::make('transfer_account_holder')
+                        ->label('Nombre del titular de la cuenta')
+                        ->maxLength(255)
+                        ->helperText('Nombre completo del titular de la cuenta bancaria.'),
+
                     TextInput::make('transfer_account_number')
                         ->label('Cuenta para transferencias')
                         ->maxLength(23)

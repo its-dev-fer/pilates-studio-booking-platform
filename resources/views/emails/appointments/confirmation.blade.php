@@ -24,7 +24,9 @@ Tu lugar esta asegurado. Hemos confirmado tu cita con los siguientes detalles:
 
 @if($appointment->payment_method === 'transfer')
 <x-mail::panel>
-**🏦 Cuenta bancaria para transferencia:** {{ $appointment->tenant?->transfer_account_number ?: 'No configurada. Contacta al estudio para validar la cuenta.' }}
+**🏦 Banco:** {{ $appointment->tenant?->transfer_bank_name ?: 'No configurado' }}  
+**👤 Titular de la cuenta:** {{ $appointment->tenant?->transfer_account_holder ?: 'No configurado' }}  
+**🔢 Cuenta para transferencia:** {{ $appointment->tenant?->transfer_account_number ?: 'No configurada. Contacta al estudio para validar la cuenta.' }}
 </x-mail::panel>
 @endif
 
