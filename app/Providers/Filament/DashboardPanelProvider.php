@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Models\Tenant;
 use App\Support\FilamentBrandColors;
+use App\Support\ReleaseNotes;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -188,6 +189,20 @@ class DashboardPanelProvider extends PanelProvider
                     }
                     
                     return ''; // En producción no renderiza nada
+                }
+            )
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_NAV_END,
+                function () {
+                    $user = auth()->user();
+
+                    if (! $user || ! $user->hasRole(['admin', 'empleado'])) {
+                        return '';
+                    }
+
+                    return new HtmlString(view('filament.components.release-notes-sidebar', [
+                        'release' => ReleaseNotes::current(),
+                    ])->render());
                 }
             );
     }
