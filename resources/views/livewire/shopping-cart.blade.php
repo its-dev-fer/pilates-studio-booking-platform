@@ -94,7 +94,12 @@
                                                 <p class="mt-1 text-xs text-stone-500">SKU: {{ $product->sku }}</p>
                                             @endif
                                             @if($item->variant_selected)
-                                                <p class="mt-1 text-xs text-stone-600">Variante seleccionada</p>
+                                                <div class="mt-2 space-y-1">
+                                                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-500">Variaciones</p>
+                                                    @foreach($item->variant_selected as $variantName => $variantValue)
+                                                        <p class="text-xs text-stone-600">{{ $variantName }}: <span class="font-medium text-stone-800">{{ $variantValue }}</span></p>
+                                                    @endforeach
+                                                </div>
                                             @endif
 
                                             <div class="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:justify-start">

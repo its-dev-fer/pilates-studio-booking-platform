@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Orders\Schemas;
 
 use App\Models\Product;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -81,8 +82,22 @@ class OrderForm
                                     ->prefix('$')
                                     ->readOnly()
                                     ->required(),
+
+                                Placeholder::make('variant_selected_preview')
+                                    ->label('Variaciones seleccionadas')
+                                    ->content(function (Get $get): string {
+                                        $selected = $get('variant_selected');
+
+                                        if (! is_array($selected) || $selected === []) {
+                                            return 'Sin variaciones';
+                                        }
+
+                                        return collect($selected)
+                                            ->map(fn ($value, $key) => $key.': '.$value)
+                                            ->implode(' | ');
+                                    }),
                             ])
-                            ->columns(3)
+                            ->columns(2)
                             ->defaultItems(1)
                             ->addActionLabel('Agregar otro producto'),
                     ]),

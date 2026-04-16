@@ -114,6 +114,26 @@
                     </div>
                 @endif
 
+                @if(!empty($variantDefinitions))
+                    <div class="rounded-3xl border border-stone-200/90 bg-white/90 p-5 shadow-sm sm:p-6">
+                        <h2 class="text-lg font-black text-stone-900">Variaciones del producto</h2>
+                        <p class="mt-1 text-sm text-stone-600">Selecciona tus opciones antes de agregar al carrito.</p>
+                        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                            @foreach($variantDefinitions as $definition)
+                                <div>
+                                    <label class="mb-1 block text-sm font-semibold text-stone-700">{{ $definition['name'] }}</label>
+                                    <select wire:model="selectedVariants.{{ $definition['name'] }}" class="w-full rounded-xl border border-stone-300 bg-[rgb(255,255,253)] px-3 py-2 text-sm text-stone-800 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                        <option value="">Selecciona una opcion</option>
+                                        @foreach($definition['values'] as $value)
+                                            <option value="{{ $value }}">{{ $value }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 <div class="rounded-3xl border border-stone-200/90 bg-white/90 p-5 shadow-sm sm:p-6">
                     <h2 class="text-lg font-black text-stone-900">Disponible por sucursal</h2>
                     <p class="mt-1 text-sm text-stone-600">Stock y precio pueden variar. Agrega desde la fila de la sucursal que prefieras.</p>
