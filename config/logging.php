@@ -131,6 +131,11 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'bugsnag' => [
+            'driver' => 'bugsnag',
+            'level' => env('BUGSNAG_LOG_LEVEL', 'error'),
+        ],
+
         'null' => [
             'driver' => 'monolog',
             'handler' => NullHandler::class,
