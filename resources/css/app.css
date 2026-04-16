@@ -15,3 +15,65 @@
     --color-primary: #5e6b58;
     --color-tertiary: #ceb9a0;
 }
+
+@layer components {
+    .product-rich-text {
+        color: #1c1917;
+        line-height: 1.7;
+    }
+
+    .product-rich-text p {
+        margin: 0 0 0.85rem;
+        color: #1c1917;
+    }
+
+    .product-rich-text h1,
+    .product-rich-text h2,
+    .product-rich-text h3,
+    .product-rich-text h4,
+    .product-rich-text h5,
+    .product-rich-text h6 {
+        color: #1c1917;
+        font-weight: 700;
+        margin: 1rem 0 0.65rem;
+        line-height: 1.35;
+    }
+
+    .product-rich-text ul,
+    .product-rich-text ol {
+        margin: 0.75rem 0 0.95rem 1.25rem;
+    }
+
+    .product-rich-text ul {
+        list-style: disc;
+    }
+
+    .product-rich-text ol {
+        list-style: decimal;
+    }
+
+    .product-rich-text li {
+        margin: 0.25rem 0;
+    }
+
+    .product-rich-text table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+    }
+
+    .product-rich-text th,
+    .product-rich-text td {
+        border: 1px solid #d6d3d1;
+        padding: 0.5rem 0.75rem;
+        vertical-align: top;
+        color: #1c1917;
+    }
+
+    .product-rich-text th {
+        background-color: rgba(206, 185, 160, 0.28);
+        border-color: rgba(94, 107, 88, 0.35);
+        color: #1c1917;
+        font-weight: 700;
+    }
+}
