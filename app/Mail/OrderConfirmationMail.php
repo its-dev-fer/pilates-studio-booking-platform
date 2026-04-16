@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
@@ -22,9 +23,17 @@ class OrderConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         $folio = str_pad((string) $this->order->id, 5, '0', STR_PAD_LEFT);
+        $adminEmails = User::role('admin')
+            ->whereNotNull('email')
+            ->pluck('email')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
 
         return new Envelope(
             subject: 'Confirmación de compra #'.$folio.' — '.config('app.name'),
+            bcc: $adminEmails,
         );
     }
 
