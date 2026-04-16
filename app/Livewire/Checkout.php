@@ -128,6 +128,12 @@ class Checkout extends Component
             }
         }
 
+        if ($this->payment_method === 'en_linea') {
+            $this->startStripeCheckout($cart, $tenantId, $userId, $subtotal, $shippingFee, $total);
+
+            return;
+        }
+
         $order = Order::create([
             'tenant_id' => $tenantId,
             'user_id' => $userId,
@@ -178,6 +184,100 @@ class Checkout extends Component
         session()->flash('success', '¡Tu orden #'.$order->id.' ha sido recibida!');
 
         $this->redirect(route('store.index'));
+    }
+
+    protected function startStripeCheckout($cart, int $tenantId, ?int $userId, float $subtotal, float $shippingFee, float $total): void
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            $existingUser = User::where('email', $this->email)->first();
+
+            if ($existingUser) {
+                $this->addError('payment_method', 'Ya existe una cuenta con este correo. Inicia sesión para pagar en línea.');
+
+                return;
+            } elseif ($this->create_account) {
+                $nameParts = User::splitFullNameForStorage($this->name);
+                $newUser = User::create([
+                    'name' => $nameParts['name'],
+                    'last_name' => $nameParts['last_name'],
+                    'email' => $this->email,
+                    'phone' => filled($this->phone) ? $this->phone : '',
+                    'password' => Hash::make($this->password ?? ''),
+                ]);
+                $newUser->assignRole('cliente');
+                auth()->login($newUser);
+                $user = $newUser;
+                $userId = $newUser->id;
+            } else {
+                $this->addError('payment_method', 'Para pagar en línea necesitas iniciar sesión o crear una cuenta.');
+
+                return;
+            }
+        }
+
+        $lineItems = [];
+        foreach ($cart->items as $cartItem) {
+            $unit = (float) ($cartItem->product->discount_price ?? $cartItem->product->price);
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'mxn',
+                    'product_data' => [
+                        'name' => $cartItem->product->title,
+                    ],
+                    'unit_amount' => (int) round($unit * 100),
+                ],
+                'quantity' => (int) $cartItem->quantity,
+            ];
+        }
+
+        if ($shippingFee > 0) {
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'mxn',
+                    'product_data' => [
+                        'name' => 'Costo de envío',
+                    ],
+                    'unit_amount' => (int) round($shippingFee * 100),
+                ],
+                'quantity' => 1,
+            ];
+        }
+
+        session([
+            'pending_store_order_checkout' => [
+                'tenant_id' => $tenantId,
+                'user_id' => $userId,
+                'guest_name' => ! $userId ? $this->name : null,
+                'guest_email' => ! $userId ? $this->email : null,
+                'guest_phone' => ! $userId ? $this->phone : null,
+                'delivery_type' => $this->delivery_type,
+                'shipping_address' => $this->delivery_type === 'domicilio' ? $this->shipping_address : null,
+                'subtotal' => $subtotal,
+                'shipping_fee' => $shippingFee,
+                'total' => $total,
+                'payment_method' => 'en_linea',
+                'items' => $cart->items->map(function ($item) {
+                    $unit = (float) ($item->product->discount_price ?? $item->product->price);
+
+                    return [
+                        'product_id' => $item->product_id,
+                        'product_title' => $item->product->title,
+                        'unit_price' => $unit,
+                        'quantity' => (int) $item->quantity,
+                        'variant_selected' => $item->variant_selected,
+                    ];
+                })->values()->all(),
+            ],
+        ]);
+
+        $checkout = $user->checkout($lineItems, [
+            'success_url' => route('store.checkout.success').'?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('store.checkout.cancel'),
+        ]);
+
+        $this->redirect($checkout->url, navigate: false);
     }
 
     public function render()

@@ -36,6 +36,12 @@
             <p class="mt-1 text-sm text-stone-600 sm:text-base">Confirma tus datos, elige cómo recibir tu pedido y el método de pago.</p>
         </div>
 
+        @if (session('error'))
+            <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                {{ session('error') }}
+            </div>
+        @endif
+
         @if($tenants->isEmpty())
             <div class="rounded-3xl border border-amber-200 bg-amber-50 px-6 py-8 text-center text-amber-900">
                 <p class="font-bold">No hay sucursales disponibles</p>

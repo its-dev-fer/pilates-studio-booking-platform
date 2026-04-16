@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\StoreCheckoutController;
 use App\Livewire\Checkout;
 use App\Livewire\CreditPackages;
 use App\Livewire\GuestCreditPackages;
@@ -31,3 +32,7 @@ Route::get('/tienda', StoreFront::class)->name('store.index');
 Route::get('/tienda/producto/{slug}', ProductShow::class)->name('store.product.show');
 Route::get('/carrito', ShoppingCart::class)->name('store.cart');
 Route::get('/checkout', Checkout::class)->name('store.checkout');
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout/tienda/success', [StoreCheckoutController::class, 'success'])->name('store.checkout.success');
+    Route::get('/checkout/tienda/cancel', [StoreCheckoutController::class, 'cancel'])->name('store.checkout.cancel');
+});
