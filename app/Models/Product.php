@@ -95,15 +95,24 @@ class Product extends Model
             return new HtmlString('');
         }
 
+        $rawDescription = $this->description;
+
+        // Si ya viene como HTML guardado, lo usamos directo para no perder formato.
+        if (is_string($rawDescription) && str_contains($rawDescription, '<')) {
+            return new HtmlString($rawDescription);
+        }
+
         try {
-            $html = RichContentRenderer::make($this->description)
+            $content = $this->normalizeRichContent($rawDescription);
+
+            $html = RichContentRenderer::make($content)
                 ->fileAttachmentsDisk('public')
                 ->fileAttachmentsVisibility('public')
                 ->toHtml();
         } catch (Throwable $e) {
             report($e);
 
-            $html = Str::of((string) $this->description)->stripTags()->squish()->toString();
+            $html = Str::of((string) $rawDescription)->stripTags()->squish()->toString();
 
             return new HtmlString($html !== '' ? '<p>'.e($html).'</p>' : '');
         }
@@ -120,14 +129,40 @@ class Product extends Model
             return '';
         }
 
+        $rawDescription = $this->description;
+
+        if (is_string($rawDescription) && str_contains($rawDescription, '<')) {
+            return Str::limit(trim(strip_tags($rawDescription)), $limit, '…') ?: '';
+        }
+
         try {
-            $text = trim(RichContentRenderer::make($this->description)->toText());
+            $text = trim(RichContentRenderer::make($this->normalizeRichContent($rawDescription))->toText());
         } catch (Throwable $e) {
             report($e);
-            $text = trim(strip_tags((string) $this->description));
+            $text = trim(strip_tags((string) $rawDescription));
         }
 
         return Str::limit($text, $limit, '…') ?: '';
+    }
+
+    protected function normalizeRichContent(mixed $raw): mixed
+    {
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        if (! is_string($raw)) {
+            return $raw;
+        }
+
+        $trimmed = trim($raw);
+        if ($trimmed === '') {
+            return $raw;
+        }
+
+        $decoded = json_decode($trimmed, true);
+
+        return json_last_error() === JSON_ERROR_NONE ? $decoded : $raw;
     }
 
     protected static function booted(): void
