@@ -1,7 +1,11 @@
 <x-mail::message>
 # ¡Hola, {{ $user->name }}!
 
+@if ($isPasswordReset ?? false)
+Un administrador restableció tus credenciales de acceso. A continuación encontrarás tu nueva contraseña temporal.
+@else
 Bienvenido a nuestro portal. Tu cuenta ha sido creada exitosamente.
+@endif
 
 A continuación, te proporcionamos tus credenciales de acceso temporal:
 
@@ -13,7 +17,7 @@ A continuación, te proporcionamos tus credenciales de acceso temporal:
 </x-mail::panel>
 
 <x-mail::button :url="$loginUrl">
-Iniciar Sesión Ahora
+{{ ($isPasswordReset ?? false) ? 'Ingresar con la nueva contraseña' : 'Iniciar Sesión Ahora' }}
 </x-mail::button>
 
 Saludos,<br>

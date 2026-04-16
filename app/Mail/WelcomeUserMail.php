@@ -17,13 +17,16 @@ class WelcomeUserMail extends Mailable
 
     public function __construct(
         public User $user,
-        public string $password
+        public string $password,
+        public bool $isPasswordReset = false,
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '¡Bienvenido a ' . config('app.name') . '!',
+            subject: $this->isPasswordReset
+                ? 'Tus credenciales de acceso han sido actualizadas'
+                : '¡Bienvenido a ' . config('app.name') . '!',
         );
     }
 
@@ -40,6 +43,7 @@ class WelcomeUserMail extends Mailable
             markdown: 'emails.users.welcome',
             with: [
                 'loginUrl' => $loginUrl,
+                'isPasswordReset' => $this->isPasswordReset,
             ],
         );
     }
