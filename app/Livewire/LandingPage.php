@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Appointment;
 use App\Models\Category;
 use App\Models\CreditPackagePromotion;
+use App\Models\CreditPurchaseRequest;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\CreditPackagePromotionPricing;
@@ -116,6 +117,13 @@ class LandingPage extends Component
             ->whereDate('date', $date->format('Y-m-d'))
             ->where('status', 'scheduled')
             ->get();
+        $pendingRequests = CreditPurchaseRequest::query()
+            ->where('requested_tenant_id', $tenant->id)
+            ->whereDate('requested_date', $date->format('Y-m-d'))
+            ->where('status', CreditPurchaseRequest::STATUS_PENDING)
+            ->whereIn('payment_method', [CreditPurchaseRequest::METHOD_TRANSFER, CreditPurchaseRequest::METHOD_CASH])
+            ->whereNotNull('requested_time_slot')
+            ->get();
 
         $dayOfWeek = $date->dayOfWeekIso;
         $businessHours = collect($tenant->business_hours ?? [])->firstWhere('day', $dayOfWeek);
@@ -138,8 +146,11 @@ class LandingPage extends Component
             $bookedCount = $appointments->filter(function ($app) use ($timeString) {
                 return Carbon::parse($app->time_slot)->format('H:i') === $timeString;
             })->count();
+            $heldByPendingRequests = $pendingRequests->filter(function (CreditPurchaseRequest $request) use ($timeString) {
+                return Carbon::parse((string) $request->requested_time_slot)->format('H:i') === $timeString;
+            })->count();
 
-            $availableSpots = $capacity - $bookedCount;
+            $availableSpots = $capacity - ($bookedCount + $heldByPendingRequests);
 
             if ($availableSpots > 0) {
                 // Definir color para la vista de Livewire

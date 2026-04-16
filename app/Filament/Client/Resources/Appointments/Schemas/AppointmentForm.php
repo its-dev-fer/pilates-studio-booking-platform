@@ -3,6 +3,7 @@
 namespace App\Filament\Client\Resources\Appointments\Schemas;
 
 use App\Models\Appointment;
+use App\Models\CreditPurchaseRequest;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
@@ -56,6 +57,13 @@ class AppointmentForm
                             }
                             
                             $appointments = $query->get();
+                            $pendingRequests = CreditPurchaseRequest::query()
+                                ->where('requested_tenant_id', $tenant->id)
+                                ->whereDate('requested_date', $date->format('Y-m-d'))
+                                ->where('status', CreditPurchaseRequest::STATUS_PENDING)
+                                ->whereIn('payment_method', [CreditPurchaseRequest::METHOD_TRANSFER, CreditPurchaseRequest::METHOD_CASH])
+                                ->whereNotNull('requested_time_slot')
+                                ->get();
                             $availableOptions = [];
 
                             // Iteramos sobre los bloques exactos que definió el admin (ej. 06:00, 07:00, 09:00)
@@ -75,8 +83,11 @@ class AppointmentForm
                                 $bookedCount = $appointments->filter(function ($app) use ($timeString) {
                                     return \Carbon\Carbon::parse($app->time_slot)->format('H:i') === $timeString;
                                 })->count();
+                                $heldByPendingRequests = $pendingRequests->filter(function (CreditPurchaseRequest $request) use ($timeString) {
+                                    return \Carbon\Carbon::parse((string) $request->requested_time_slot)->format('H:i') === $timeString;
+                                })->count();
 
-                                $availableSpots = $capacity - $bookedCount;
+                                $availableSpots = $capacity - ($bookedCount + $heldByPendingRequests);
 
                                 // Si hay lugares disponibles (o es la cita actual), lo agregamos con colores
                                 if ($availableSpots > 0 || $isCurrentRecordSlot) {

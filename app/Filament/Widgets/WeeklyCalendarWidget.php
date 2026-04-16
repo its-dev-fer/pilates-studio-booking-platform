@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Appointment;
+use App\Models\CreditPurchaseRequest;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Widgets\Widget;
@@ -33,6 +34,13 @@ class WeeklyCalendarWidget extends Widget
         $appointments = Appointment::where('tenant_id', $tenant->id)
             ->whereBetween('date', [$startOfWeek->format('Y-m-d'), $endOfWeek->format('Y-m-d')])
             ->where('status', 'scheduled')
+            ->get();
+        $pendingRequests = CreditPurchaseRequest::query()
+            ->where('requested_tenant_id', $tenant->id)
+            ->whereBetween('requested_date', [$startOfWeek->format('Y-m-d'), $endOfWeek->format('Y-m-d')])
+            ->where('status', CreditPurchaseRequest::STATUS_PENDING)
+            ->whereIn('payment_method', [CreditPurchaseRequest::METHOD_TRANSFER, CreditPurchaseRequest::METHOD_CASH])
+            ->whereNotNull('requested_time_slot')
             ->get();
 
         $businessHours = collect($tenant->business_hours ?? []);
@@ -80,8 +88,12 @@ class WeeklyCalendarWidget extends Widget
                         return $app->date->format('Y-m-d') === $date->format('Y-m-d') &&
                                Carbon::parse($app->time_slot)->format('H:i') === $timeString;
                     })->count();
+                    $heldByPendingRequests = $pendingRequests->filter(function (CreditPurchaseRequest $request) use ($date, $timeString) {
+                        return Carbon::parse((string) $request->requested_date)->format('Y-m-d') === $date->format('Y-m-d')
+                            && Carbon::parse((string) $request->requested_time_slot)->format('H:i') === $timeString;
+                    })->count();
 
-                    $available = $capacity - $bookedCount;
+                    $available = $capacity - ($bookedCount + $heldByPendingRequests);
                     
                     if ($available >= 3) $color = 'emerald';
                     elseif ($available > 0) $color = 'amber';

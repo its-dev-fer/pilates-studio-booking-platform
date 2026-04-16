@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\CreditPurchaseRequests\Tables;
 
+use App\Models\Appointment;
 use App\Models\CreditPackagePurchase;
 use App\Models\CreditPurchaseRequest;
 use App\Models\UserCredit;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
@@ -113,8 +115,10 @@ class CreditPurchaseRequestsTable
                     ->visible(fn (CreditPurchaseRequest $record): bool => $record->status === CreditPurchaseRequest::STATUS_PENDING)
                     ->requiresConfirmation()
                     ->modalHeading('Confirmar pago y acreditar créditos')
-                    ->modalDescription('Esta acción acredita los créditos al cliente y no agenda automáticamente su cita.')
+                    ->modalDescription('Esta acción acredita los créditos al cliente y, si solicitó un horario, intenta asignarlo automáticamente.')
                     ->action(function (CreditPurchaseRequest $record): void {
+                        $outcomeMessage = 'La solicitud fue revisada. Si cumplía reglas, los créditos ya fueron acreditados.';
+
                         DB::transaction(function () use ($record): void {
                             $record->refresh();
 
@@ -124,6 +128,7 @@ class CreditPurchaseRequestsTable
 
                             $user = $record->user;
                             $package = $record->package;
+                            $reviewNotes = [];
 
                             $hasActiveCredits = $user->credits()
                                 ->where('balance', '>', 0)
@@ -172,16 +177,59 @@ class CreditPurchaseRequestsTable
                                 'is_special' => false,
                             ]);
 
+                            $canAutoSchedule = $record->requested_tenant_id && $record->requested_date && $record->requested_time_slot;
+
+                            if ($canAutoSchedule) {
+                                $slotTime = Carbon::parse((string) $record->requested_time_slot)->format('H:i');
+
+                                $alreadyScheduled = Appointment::query()
+                                    ->where('user_id', $user->id)
+                                    ->whereDate('date', $record->requested_date)
+                                    ->where('time_slot', 'like', $slotTime.'%')
+                                    ->where('status', 'scheduled')
+                                    ->exists();
+
+                                if (! $alreadyScheduled) {
+                                    $activeCredit = UserCredit::query()
+                                        ->where('user_id', $user->id)
+                                        ->where('tenant_id', (int) $record->requested_tenant_id)
+                                        ->where('balance', '>', 0)
+                                        ->where('expires_at', '>', now())
+                                        ->latest('id')
+                                        ->first();
+
+                                    if ($activeCredit) {
+                                        $activeCredit->decrement('balance', 1);
+
+                                        Appointment::create([
+                                            'tenant_id' => (int) $record->requested_tenant_id,
+                                            'user_id' => $user->id,
+                                            'date' => $record->requested_date,
+                                            'time_slot' => $record->requested_time_slot,
+                                            'status' => 'scheduled',
+                                            'check_in_status' => 'pendiente',
+                                        ]);
+
+                                        $reviewNotes[] = 'Pago aprobado y clase asignada automáticamente.';
+                                    } else {
+                                        $reviewNotes[] = 'Pago aprobado, pero no se pudo asignar la clase automáticamente porque no se encontró crédito activo para la sucursal solicitada.';
+                                    }
+                                } else {
+                                    $reviewNotes[] = 'Pago aprobado. El cliente ya estaba inscrito en ese horario, no se generó una cita duplicada.';
+                                }
+                            }
+
                             $record->update([
                                 'status' => CreditPurchaseRequest::STATUS_APPROVED,
                                 'reviewed_by' => Auth::id(),
                                 'reviewed_at' => now(),
+                                'review_notes' => count($reviewNotes) > 0 ? implode(' ', $reviewNotes) : $record->review_notes,
                             ]);
                         });
 
                         Notification::make()
                             ->title('Solicitud procesada')
-                            ->body('La solicitud fue revisada. Si cumplía reglas, los créditos ya fueron acreditados.')
+                            ->body($outcomeMessage)
                             ->success()
                             ->send();
                     }),

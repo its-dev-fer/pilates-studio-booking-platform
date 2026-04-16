@@ -3,6 +3,7 @@
 namespace App\Filament\Client\Widgets;
 
 use App\Models\Appointment;
+use App\Models\CreditPurchaseRequest;
 use App\Models\UserCredit;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
@@ -37,6 +38,13 @@ class ClientWeeklyCalendarWidget extends Widget
             ->whereBetween('date', [$startOfWeek->format('Y-m-d'), $endOfWeek->format('Y-m-d')])
             ->where('status', 'scheduled')
             ->get();
+        $pendingRequests = CreditPurchaseRequest::query()
+            ->where('requested_tenant_id', $tenant->id)
+            ->whereBetween('requested_date', [$startOfWeek->format('Y-m-d'), $endOfWeek->format('Y-m-d')])
+            ->where('status', CreditPurchaseRequest::STATUS_PENDING)
+            ->whereIn('payment_method', [CreditPurchaseRequest::METHOD_TRANSFER, CreditPurchaseRequest::METHOD_CASH])
+            ->whereNotNull('requested_time_slot')
+            ->get();
 
         $businessHours = collect($tenant->business_hours ?? []);
         $weekDays = [];
@@ -62,6 +70,10 @@ class ClientWeeklyCalendarWidget extends Widget
                         return $app->date->format('Y-m-d') === $date->format('Y-m-d') &&
                                Carbon::parse($app->time_slot)->format('H:i') === $timeString;
                     })->count();
+                    $heldByPendingRequests = $pendingRequests->filter(function (CreditPurchaseRequest $request) use ($date, $timeString) {
+                        return Carbon::parse((string) $request->requested_date)->format('Y-m-d') === $date->format('Y-m-d')
+                            && Carbon::parse((string) $request->requested_time_slot)->format('H:i') === $timeString;
+                    })->count();
 
                     // ¿El cliente actual ya está en esta clase?
                     $isBookedByMe = $allAppointments->contains(function ($app) use ($date, $timeString, $user) {
@@ -70,7 +82,7 @@ class ClientWeeklyCalendarWidget extends Widget
                                Carbon::parse($app->time_slot)->format('H:i') === $timeString;
                     });
 
-                    $available = $capacity - $bookedCount;
+                    $available = $capacity - ($bookedCount + $heldByPendingRequests);
                     
                     if ($available >= 3) $color = 'emerald';
                     elseif ($available > 0) $color = 'amber';
