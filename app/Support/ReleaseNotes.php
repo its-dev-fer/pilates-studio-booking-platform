@@ -7,7 +7,13 @@ use Illuminate\Support\Facades\Cache;
 class ReleaseNotes
 {
     /**
-     * @return array{version: string, branch: string, commit_hash: string, commit_subject: string}
+     * @return array{
+     *     version: string,
+     *     branch: string,
+     *     commit_hash: string,
+     *     commit_subject: string,
+     *     recent_commits: array<int, array{hash: string, date: string, subject: string}>
+     * }
      */
     public static function current(): array
     {
@@ -20,6 +26,7 @@ class ReleaseNotes
                 'branch' => self::gitBranch(),
                 'commit_hash' => self::gitCommitHash(),
                 'commit_subject' => self::gitCommitSubject(),
+                'recent_commits' => self::recentCommits(),
             ];
         });
     }
@@ -64,5 +71,40 @@ class ReleaseNotes
         $value = trim($output);
 
         return $value !== '' ? $value : null;
+    }
+
+    /**
+     * @return array<int, array{hash: string, date: string, subject: string}>
+     */
+    protected static function recentCommits(): array
+    {
+        $raw = self::runGitCommand("log -3 --date=format:'%d/%m/%Y %H:%M' --pretty=format:'%h|%ad|%s'");
+
+        if (! $raw) {
+            return [];
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', $raw) ?: [];
+        $commits = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            $parts = explode('|', $line, 3);
+            if (count($parts) !== 3) {
+                continue;
+            }
+
+            $commits[] = [
+                'hash' => trim($parts[0]),
+                'date' => trim($parts[1]),
+                'subject' => trim($parts[2]),
+            ];
+        }
+
+        return $commits;
     }
 }
