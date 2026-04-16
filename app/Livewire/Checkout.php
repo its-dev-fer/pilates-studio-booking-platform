@@ -123,6 +123,7 @@ class Checkout extends Component
                     'password' => Hash::make($this->password),
                 ]);
                 $newUser->assignRole('cliente');
+                $newUser->tenants()->sync(Tenant::pluck('id')->all());
                 $userId = $newUser->id;
                 auth()->login($newUser);
             }
@@ -207,6 +208,7 @@ class Checkout extends Component
                     'password' => Hash::make($this->password ?? ''),
                 ]);
                 $newUser->assignRole('cliente');
+                $newUser->tenants()->sync(Tenant::pluck('id')->all());
                 auth()->login($newUser);
                 $user = $newUser;
                 $userId = $newUser->id;

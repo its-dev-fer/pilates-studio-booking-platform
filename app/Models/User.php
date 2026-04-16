@@ -61,6 +61,10 @@ class User extends Authenticatable implements FilamentUser, HasTenants
             return true;
         }
 
+        if ($this->hasRole('cliente') && ! $this->tenants()->exists()) {
+            return true;
+        }
+
         return $this->tenants()->whereKey($tenant)->exists();
     }
 
@@ -68,6 +72,10 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     {
         // Si es admin, ve todos los tenants disponibles. Si no, solo a los que está asignado.
         if ($this->hasRole('admin')) {
+            return Tenant::all();
+        }
+
+        if ($this->hasRole('cliente') && $this->tenants()->doesntExist()) {
             return Tenant::all();
         }
 

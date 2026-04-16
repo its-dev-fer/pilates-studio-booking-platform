@@ -62,7 +62,7 @@
                 </a>
 
                 @auth
-                    <a href="{{ url('/dashboard') }}" class="rounded-full bg-primary px-4 py-2 text-sm font-bold text-[rgb(255,255,253)] shadow-[0_12px_40px_-12px_rgba(94,107,88,0.35)] transition hover:-translate-y-0.5">Mi cuenta</a>
+                    <a href="{{ auth()->user()->hasRole('cliente') ? url('/clientes') : url('/dashboard') }}" class="rounded-full bg-primary px-4 py-2 text-sm font-bold text-[rgb(255,255,253)] shadow-[0_12px_40px_-12px_rgba(94,107,88,0.35)] transition hover:-translate-y-0.5">Mi cuenta</a>
                 @else
                     <a href="{{ route('login') }}" class="rounded-full border border-stone-300 bg-white/90 px-4 py-2 text-sm font-bold text-primary shadow-sm transition hover:border-primary hover:bg-primary hover:text-[rgb(255,255,253)]">Iniciar sesión</a>
                 @endauth
@@ -86,7 +86,7 @@
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('store.cart') }}" class="rounded-full border border-stone-300 bg-white/90 px-4 py-2 text-sm font-semibold text-primary">Carrito ({{ $cartCount ?? 0 }})</a>
                 @auth
-                    <a href="{{ url('/dashboard') }}" class="rounded-full bg-primary px-4 py-2 text-sm font-bold text-[rgb(255,255,253)]">Mi cuenta</a>
+                    <a href="{{ auth()->user()->hasRole('cliente') ? url('/clientes') : url('/dashboard') }}" class="rounded-full bg-primary px-4 py-2 text-sm font-bold text-[rgb(255,255,253)]">Mi cuenta</a>
                 @else
                     <a href="{{ route('login') }}" class="rounded-full bg-primary px-4 py-2 text-sm font-bold text-[rgb(255,255,253)]">Iniciar sesión</a>
                 @endauth
