@@ -14,7 +14,10 @@ class Appointment extends Model
         'time_slot',
         'status',
         'check_in_status',
-        'checked_in_by'
+        'checked_in_by',
+        'payment_method',
+        'booking_origin',
+        'credit_purchase_request_id',
     ];
 
     protected function casts(): array
@@ -37,5 +40,10 @@ class Appointment extends Model
     public function checkedInBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'checked_in_by');
+    }
+
+    public function creditPurchaseRequest(): BelongsTo
+    {
+        return $this->belongsTo(CreditPurchaseRequest::class, 'credit_purchase_request_id');
     }
 }

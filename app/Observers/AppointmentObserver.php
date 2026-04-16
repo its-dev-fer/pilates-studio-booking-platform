@@ -4,7 +4,6 @@ namespace App\Observers;
 
 use App\Mail\AppointmentConfirmationMail;
 use App\Models\Appointment;
-use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 
 class AppointmentObserver
@@ -14,17 +13,11 @@ class AppointmentObserver
      */
     public function created(Appointment $appointment): void
     {
+        $appointment->loadMissing(['user', 'tenant', 'creditPurchaseRequest.package']);
+
         if ($appointment->user && $appointment->user->email) {
             Mail::to($appointment->user->email)
-                ->send(new AppointmentConfirmationMail($appointment, false)); // false = No es admin
-        }
-
-        // 2. Enviar correo a los Administradores (Modo Admin)
-        $adminEmails = User::role('admin')->pluck('email')->toArray();
-        
-        if (!empty($adminEmails)) {
-            Mail::to($adminEmails)
-                ->send(new AppointmentConfirmationMail($appointment, true)); // true = Sí es admin
+                ->send(new AppointmentConfirmationMail($appointment));
         }
     }
 

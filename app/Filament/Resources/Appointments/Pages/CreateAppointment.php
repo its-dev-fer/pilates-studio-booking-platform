@@ -42,6 +42,8 @@ class CreateAppointment extends CreateRecord
             $this->halt();
         }
 
+        $data['booking_origin'] = 'admin_panel';
+
         return $data;
     }
 
@@ -59,6 +61,10 @@ class CreateAppointment extends CreateRecord
             ->first();
 
         if ($activeCredit) {
+            $appointment->update([
+                'payment_method' => 'credit_balance',
+            ]);
+
             // Regla A: Descontamos 1 crédito en silencio
             $activeCredit->decrement('balance', 1);
 
@@ -79,6 +85,9 @@ class CreateAppointment extends CreateRecord
             ]);
 
             $appointment->update(['check_in_status' => 'cobrar_al_llegar']);
+            $appointment->update([
+                'payment_method' => 'cash_at_arrival',
+            ]);
 
             Notification::make()
                 ->title('¡ATENCIÓN: Cliente sin créditos!')

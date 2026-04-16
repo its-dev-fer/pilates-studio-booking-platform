@@ -61,6 +61,8 @@ class ProcessPendingBooking
                     'time_slot' => $booking['time_slot'],
                     'status' => 'scheduled',
                     'check_in_status' => 'pendiente', // Ya está cubierta por su paquete
+                    'payment_method' => 'credit_balance',
+                    'booking_origin' => 'landing_pending_booking',
                 ]);
 
                 Notification::make()

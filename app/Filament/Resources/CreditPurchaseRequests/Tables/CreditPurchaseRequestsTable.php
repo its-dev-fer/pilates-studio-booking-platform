@@ -208,6 +208,9 @@ class CreditPurchaseRequestsTable
                                             'time_slot' => $record->requested_time_slot,
                                             'status' => 'scheduled',
                                             'check_in_status' => 'pendiente',
+                                            'payment_method' => $record->payment_method,
+                                            'booking_origin' => 'approved_credit_request',
+                                            'credit_purchase_request_id' => $record->id,
                                         ]);
 
                                         $reviewNotes[] = 'Pago aprobado y clase asignada automáticamente.';

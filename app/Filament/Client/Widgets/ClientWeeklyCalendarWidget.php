@@ -153,6 +153,8 @@ class ClientWeeklyCalendarWidget extends Widget
             'time_slot' => $time,
             'status' => 'scheduled',
             'check_in_status' => 'pendiente',
+            'payment_method' => 'credit_balance',
+            'booking_origin' => 'client_weekly_calendar',
         ]);
 
         Notification::make()

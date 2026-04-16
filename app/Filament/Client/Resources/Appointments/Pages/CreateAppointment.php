@@ -76,6 +76,9 @@ class CreateAppointment extends CreateRecord
             $this->halt(); // Cancela la creación en la base de datos
         }
 
+        $data['payment_method'] = 'credit_balance';
+        $data['booking_origin'] = 'client_panel';
+
         return $data;
     }
 

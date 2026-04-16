@@ -130,6 +130,9 @@ class CheckoutController extends Controller
                     'date' => $pendingAppointment['date'],
                     'time_slot' => $pendingAppointment['time_slot'],
                     'status' => 'scheduled',
+                    'check_in_status' => 'pendiente',
+                    'payment_method' => 'stripe',
+                    'booking_origin' => 'stripe_checkout_pending_appointment',
                 ]);
 
                 // Limpiar la intención de sesión
