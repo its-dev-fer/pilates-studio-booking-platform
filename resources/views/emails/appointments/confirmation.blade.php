@@ -30,6 +30,20 @@ Tu lugar esta asegurado. Hemos confirmado tu cita con los siguientes detalles:
 </x-mail::panel>
 @endif
 
+@if(filled($appointment->tenant?->whatsapp_phone))
+@php($waDigits = preg_replace('/\D+/', '', (string) $appointment->tenant->whatsapp_phone))
+<x-mail::panel>
+**📲 Notifica cualquier cambio o cancelacion por WhatsApp:**  
+{{ $appointment->tenant->whatsapp_phone }}
+
+@if(filled($waDigits))
+<x-mail::button :url="'https://wa.me/' . $waDigits">
+Enviar mensaje por WhatsApp
+</x-mail::button>
+@endif
+</x-mail::panel>
+@endif
+
 <x-mail::button :url="url('/clientes/login')">
 Ver Mis Reservas
 </x-mail::button>

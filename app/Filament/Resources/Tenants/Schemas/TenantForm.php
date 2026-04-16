@@ -96,6 +96,12 @@ class TenantForm
                         ->maxLength(255)
                         ->helperText('Nombre completo del titular de la cuenta bancaria.'),
 
+                    TextInput::make('whatsapp_phone')
+                        ->label('WhatsApp de sucursal')
+                        ->tel()
+                        ->maxLength(25)
+                        ->helperText('Incluye lada de país. Ejemplo: +529611234567.'),
+
                     TextInput::make('transfer_account_number')
                         ->label('Cuenta para transferencias')
                         ->maxLength(23)

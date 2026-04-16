@@ -14,6 +14,21 @@ Te esperamos en 2 horas. Recuerda traer tu botella de agua y llegar con ropa có
 **¡Tu clase empieza en 15 minutos!** Ve preparándote, ¡nos vemos en el studio!
 @endif
 
+@if(filled($appointment->tenant?->whatsapp_phone))
+@php($waDigits = preg_replace('/\D+/', '', (string) $appointment->tenant->whatsapp_phone))
+
+<x-mail::panel>
+**📲 Notifica cualquier cambio o cancelacion por WhatsApp:**  
+{{ $appointment->tenant->whatsapp_phone }}
+</x-mail::panel>
+
+@if(filled($waDigits))
+<x-mail::button :url="'https://wa.me/' . $waDigits">
+Enviar mensaje por WhatsApp
+</x-mail::button>
+@endif
+@endif
+
 Saludos,<br>
 El equipo de {{ config('app.name') }}
 </x-mail::message>

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Tenant extends Model
 {
     protected $fillable = [
-        'name', 'slug', 'address', 'transfer_account_number', 'transfer_bank_name', 'transfer_account_holder', 'shipping_fee', 'max_appointments_per_day', 'business_hours', 'capacity_per_slot',
+        'name', 'slug', 'address', 'transfer_account_number', 'transfer_bank_name', 'transfer_account_holder', 'whatsapp_phone', 'shipping_fee', 'max_appointments_per_day', 'business_hours', 'capacity_per_slot',
     ];
 
     protected $casts = [

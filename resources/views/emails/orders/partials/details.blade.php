@@ -74,6 +74,20 @@
                                         <p style="margin:6px 0 0;font-size:14px;color:{{ $stone600 }};"><strong style="color:{{ $stone900 }};">Titular de la cuenta:</strong> {{ $order->tenant?->transfer_account_holder ?? 'No configurado' }}</p>
                                         <p style="margin:6px 0 0;font-size:14px;color:{{ $stone600 }};"><strong style="color:{{ $stone900 }};">Cuenta para transferencia:</strong> {{ $order->tenant?->transfer_account_number ?? 'No configurada' }}</p>
                                     @endif
+                                    @if(($order->payment_method ?? null) !== 'en_linea' && filled($order->tenant?->whatsapp_phone))
+                                        @php($waDigits = preg_replace('/\D+/', '', (string) $order->tenant->whatsapp_phone))
+                                        <p style="margin:12px 0 0;font-size:14px;color:{{ $stone600 }};">
+                                            <strong style="color:{{ $stone900 }};">Envia tu comprobante de pago por WhatsApp:</strong>
+                                            {{ $order->tenant->whatsapp_phone }}
+                                        </p>
+                                        @if(filled($waDigits))
+                                            <p style="margin:8px 0 0;">
+                                                <a href="https://wa.me/{{ $waDigits }}" style="display:inline-block;padding:10px 16px;background-color:{{ $primary }};color:{{ $paper }}!important;text-decoration:none;font-size:13px;font-weight:700;border-radius:999px;">
+                                                    Enviar comprobante por WhatsApp
+                                                </a>
+                                            </p>
+                                        @endif
+                                    @endif
                                 </td>
                             </tr>
                         </table>
