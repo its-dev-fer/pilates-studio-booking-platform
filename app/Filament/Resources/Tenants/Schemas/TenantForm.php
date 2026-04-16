@@ -14,6 +14,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class TenantForm
 {
@@ -31,7 +32,9 @@ class TenantForm
 
                     TextInput::make('slug')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->rules(fn (string $operation): array => $operation === 'create'
+                            ? [Rule::unique('tenants', 'slug')]
+                            : [])
                         ->maxLength(255),
 
                     Textarea::make('address')

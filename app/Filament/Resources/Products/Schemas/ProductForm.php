@@ -16,7 +16,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -39,7 +38,9 @@ class ProductForm
                             ->disabled()
                             ->dehydrated()
                             ->required()
-                            ->unique(Product::class, 'slug', ignoreRecord: true),
+                            ->rules(fn (string $operation): array => $operation === 'create'
+                                ? [Rule::unique('products', 'slug')]
+                                : []),
 
                         RichEditor::make('description')
                             ->label('Descripción')
@@ -83,13 +84,13 @@ class ProductForm
                             ->label('SKU (Código Interno)')
                             ->required()
                             ->rules([
-                                function (Get $get): Unique {
-                                    $record = request()->route('record');
-                                    $ignoreId = $record instanceof Model ? $record->getKey() : $record;
+                                function (Get $get, string $operation): ?Unique {
+                                    if ($operation !== 'create') {
+                                        return null;
+                                    }
 
                                     return Rule::unique('products', 'sku')
-                                        ->where('tenant_id', $get('tenant_id'))
-                                        ->ignore($ignoreId);
+                                        ->where('tenant_id', $get('tenant_id'));
                                 },
                             ]),
 

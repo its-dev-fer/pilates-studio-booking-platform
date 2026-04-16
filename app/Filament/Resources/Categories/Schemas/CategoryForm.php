@@ -12,6 +12,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class CategoryForm
 {
@@ -31,7 +32,9 @@ class CategoryForm
                             ->disabled()
                             ->dehydrated()
                             ->required()
-                            ->unique(Category::class, 'slug', ignoreRecord: true),
+                            ->rules(fn (string $operation): array => $operation === 'create'
+                                ? [Rule::unique('categories', 'slug')]
+                                : []),
 
                         Select::make('store_section_id')
                             ->relationship('storeSection', 'name') // Debe existir la relación en tu modelo Category

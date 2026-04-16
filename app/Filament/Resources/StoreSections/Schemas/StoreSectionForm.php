@@ -9,6 +9,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class StoreSectionForm
 {
@@ -27,7 +28,9 @@ class StoreSectionForm
                         ->disabled()
                         ->dehydrated()
                         ->required()
-                        ->unique(StoreSection::class, 'slug', ignoreRecord: true),
+                        ->rules(fn (string $operation): array => $operation === 'create'
+                            ? [Rule::unique('store_sections', 'slug')]
+                            : []),
 
                     Toggle::make('is_active')
                         ->label('Visible al público')

@@ -8,6 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserForm
 {
@@ -27,7 +28,9 @@ class UserForm
                     TextInput::make('email')
                         ->email()
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->rules(fn (string $operation): array => $operation === 'create'
+                            ? [Rule::unique('users', 'email')]
+                            : [])
                         ->maxLength(255),
                     TextInput::make('phone')
                         ->label('Teléfono')
