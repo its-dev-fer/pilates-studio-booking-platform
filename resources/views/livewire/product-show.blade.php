@@ -109,8 +109,8 @@
                 @endif
 
                 @if(filled($product->description))
-                    <div class="prose prose-stone max-w-none prose-p:text-stone-600 prose-headings:text-stone-900">
-                        {!! $product->descriptionHtml() !!}
+                    <div class="prose prose-stone max-w-none prose-p:text-stone-600 prose-headings:text-stone-900 prose-ul:list-disc prose-ol:list-decimal prose-li:marker:text-primary prose-table:w-full prose-th:border prose-th:border-stone-300 prose-th:bg-stone-100 prose-th:px-3 prose-th:py-2 prose-td:border prose-td:border-stone-200 prose-td:px-3 prose-td:py-2">
+                        {!! new \Illuminate\Support\HtmlString((string) $product->description) !!}
                     </div>
                 @endif
 
