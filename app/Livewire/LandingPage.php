@@ -38,10 +38,12 @@ class LandingPage extends Component
     public $availableSlots = [];
 
     public $maxDate;
+    public ?int $selectedLocationTenant = null;
 
     public function mount()
     {
         $this->tenants = Tenant::all();
+        $this->selectedLocationTenant = $this->tenants->first()?->id;
         // Ventana de reserva: próximos 30 días.
         $this->maxDate = Carbon::now()->addDays(30)->format('Y-m-d');
     }
@@ -261,5 +263,31 @@ class LandingPage extends Component
     {
         $this->selectedSlot = null;
         $this->calculateAvailableSlots();
+    }
+
+    public function selectLocationTenant(int $tenantId): void
+    {
+        if (! $this->tenants->contains('id', $tenantId)) {
+            return;
+        }
+
+        $this->selectedLocationTenant = $tenantId;
+    }
+
+    public function getSelectedLocationTenantDataProperty(): ?Tenant
+    {
+        if (! $this->selectedLocationTenant) {
+            return null;
+        }
+
+        return $this->tenants->firstWhere('id', $this->selectedLocationTenant);
+    }
+
+    public function getSelectedLocationMapUrlProperty(): string
+    {
+        $tenant = $this->selectedLocationTenantData;
+        $query = trim((string) ($tenant?->address ?: $tenant?->name ?: 'Hannah Reforme Studio'));
+
+        return 'https://www.google.com/maps?q='.rawurlencode($query).'&output=embed';
     }
 }

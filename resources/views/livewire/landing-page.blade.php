@@ -501,15 +501,23 @@
 
                     <div class="mt-8 space-y-5">
                         @foreach($tenants as $tenant)
-                        <div class="flex items-start rounded-2xl border border-stone-200/90 bg-white/80 p-4 shadow-sm">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-[rgb(255,255,253)]">
+                        <button
+                            type="button"
+                            wire:click="selectLocationTenant({{ $tenant->id }})"
+                            class="flex w-full items-start rounded-2xl border p-4 text-left shadow-sm transition
+                            {{ $selectedLocationTenant === $tenant->id
+                                ? 'border-primary bg-primary/5'
+                                : 'border-stone-200/90 bg-white/80 hover:border-primary/40' }}"
+                        >
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[rgb(255,255,253)]
+                                {{ $selectedLocationTenant === $tenant->id ? 'bg-primary' : 'bg-primary/80' }}">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-base font-semibold text-stone-900 sm:text-lg">{{ $tenant->name }}</h3>
                                 <p class="mt-1 text-sm text-stone-600">{{ $tenant->address ?? 'Dirección por definir' }}</p>
                             </div>
-                        </div>
+                        </button>
                         @endforeach
 
                         <div id="contacto" class="scroll-mt-24 mt-6 flex items-center rounded-2xl border border-stone-200/90 bg-white/80 p-4 shadow-sm sm:scroll-mt-28">
@@ -526,7 +534,7 @@
 
                 <div class="h-80 overflow-hidden rounded-3xl border border-stone-200/90 shadow-lg shadow-stone-900/10 sm:h-96 lg:h-auto">
                     <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m12!1m8!1m3!1d238.77741463366903!2d-93.14167695503912!3d16.75483891336421!3m2!1i1024!2i768!4f13.1!2m1!1sBoulevard%20Belisario%20Dominguez%20Plaza%201802!5e0!3m2!1ses-419!2smx!4v1773956260404!5m2!1ses-419!2smx"
+                        src="{{ $this->selectedLocationMapUrl }}"
                         width="100%"
                         height="100%"
                         style="border:0;"
