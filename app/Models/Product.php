@@ -102,6 +102,15 @@ class Product extends Model
             return new HtmlString($rawDescription);
         }
 
+        // Si viene como HTML escapado (&lt;p&gt;...), lo decodificamos.
+        if (is_string($rawDescription) && str_contains($rawDescription, '&lt;')) {
+            $decodedHtml = html_entity_decode($rawDescription, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            if (str_contains($decodedHtml, '<')) {
+                return new HtmlString($decodedHtml);
+            }
+        }
+
         try {
             $content = $this->normalizeRichContent($rawDescription);
 
@@ -113,6 +122,11 @@ class Product extends Model
             report($e);
 
             $html = Str::of((string) $rawDescription)->stripTags()->squish()->toString();
+            $plain = trim((string) $rawDescription);
+
+            if ($plain !== '') {
+                return new HtmlString('<p>'.nl2br(e($plain)).'</p>');
+            }
 
             return new HtmlString($html !== '' ? '<p>'.e($html).'</p>' : '');
         }
