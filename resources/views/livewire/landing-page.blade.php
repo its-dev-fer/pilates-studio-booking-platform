@@ -41,7 +41,7 @@
 
     <section id="hero" class="relative flex min-h-screen scroll-mt-24 items-center overflow-hidden sm:scroll-mt-28">
         <video autoplay loop muted playsinline class="absolute inset-0 z-0 h-full w-full object-cover max-lg:object-[20%_center] lg:object-center opacity-[0.82] contrast-[1.03] saturate-[1.05]">
-            <source src="https://videos.pexels.com/video-files/6111099/6111099-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+            <source src="{{asset('assets/hero.mp4')}}" type="video/mp4" />
         </video>
         <div class="hero-scrim pointer-events-none absolute inset-0 z-10"></div>
         <div class="glow-pulse absolute -left-24 top-20 z-10 h-48 w-48 rounded-full bg-primary/15 blur-3xl"></div>
