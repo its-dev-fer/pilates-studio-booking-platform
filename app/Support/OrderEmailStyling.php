@@ -7,6 +7,30 @@ use App\Models\Order;
 class OrderEmailStyling
 {
     /**
+     * Paleta y tokens compartidos entre correos transaccionales.
+     *
+     * @return array{
+     *     primary: string,
+     *     tertiary: string,
+     *     paper: string,
+     *     stone900: string,
+     *     stone600: string,
+     *     stone200: string,
+     * }
+     */
+    public static function palette(): array
+    {
+        return [
+            'primary' => '#5e6b58',
+            'tertiary' => '#ceb9a0',
+            'paper' => '#fffffd',
+            'stone900' => '#1c1917',
+            'stone600' => '#57534e',
+            'stone200' => '#e7e5e4',
+        ];
+    }
+
+    /**
      * Variables compartidas para plantillas de correo de pedidos (colores, folio, helpers).
      *
      * @return array{
@@ -75,18 +99,12 @@ class OrderEmailStyling
             return $parts === [] ? '—' : implode(' · ', $parts);
         };
 
-        return [
+        return array_merge(static::palette(), [
             'folio' => $folio,
-            'primary' => '#5e6b58',
-            'tertiary' => '#ceb9a0',
-            'paper' => '#fffffd',
-            'stone900' => '#1c1917',
-            'stone600' => '#57534e',
-            'stone200' => '#e7e5e4',
             'statusLabel' => $statusLabel,
             'deliveryLabel' => $deliveryLabel,
             'paymentLabel' => $paymentLabel,
             'formatVariants' => $formatVariants,
-        ];
+        ]);
     }
 }

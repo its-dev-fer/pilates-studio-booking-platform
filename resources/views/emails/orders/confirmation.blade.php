@@ -3,7 +3,7 @@
     $emailPageTitle = 'Confirmación de compra #'.$folio;
 @endphp
 @include('emails.orders.partials.shell-open')
-@include('emails.orders.partials.brand-header', ['subtitle' => 'Confirmación de compra'])
+@include('emails.orders.partials.brand-header', ['subtitle' => 'Confirmación de compra', 'eyebrow' => 'Tienda'])
                 {{-- Intro + folio --}}
                 <tr>
                     <td style="padding:28px 32px 8px;">

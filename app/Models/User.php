@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Mail\CreditsAssignedMail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
@@ -14,6 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Cashier\Billable;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -160,6 +162,96 @@ class User extends Authenticatable implements FilamentUser, HasTenants
             ->where('balance', '>', 0)
             ->where('expires_at', '>', now())
             ->sum('balance');
+    }
+
+    /** @return array<int, array{tenant_id: int, tenant_name: string, balance: int, expires_at: ?Carbon}> */
+    public function branchCreditSummary(): array
+    {
+        return Tenant::query()
+            ->orderBy('name')
+            ->get()
+            ->map(function (Tenant $tenant): array {
+                $activeCredits = $this->credits()
+                    ->where('tenant_id', $tenant->id)
+                    ->where('balance', '>', 0)
+                    ->where('expires_at', '>', now())
+                    ->get();
+
+                return [
+                    'tenant_id' => $tenant->id,
+                    'tenant_name' => $tenant->name,
+                    'balance' => $activeCredits->sum('balance'),
+                    'expires_at' => $activeCredits->max('expires_at'),
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * @param  array<int, int>  $affectedTenantIds
+     */
+    public function sendCreditsAssignedNotification(string $source, array $affectedTenantIds = []): void
+    {
+        if (! filled($this->email)) {
+            return;
+        }
+
+        Mail::to($this->email)->send(new CreditsAssignedMail(
+            user: $this->fresh(),
+            source: $source,
+            affectedTenantIds: $affectedTenantIds,
+        ));
+    }
+
+    public function grantAdminCredits(int $tenantId, int $amount): UserCredit
+    {
+        $credit = $this->credits()
+            ->where('tenant_id', $tenantId)
+            ->where('balance', '>', 0)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if ($credit) {
+            $credit->update([
+                'balance' => $credit->balance + $amount,
+                'expires_at' => now()->addDays(30),
+            ]);
+
+            return $credit;
+        }
+
+        return $this->credits()->create([
+            'tenant_id' => $tenantId,
+            'balance' => $amount,
+            'expires_at' => now()->addDays(30),
+            'is_special' => true,
+        ]);
+    }
+
+    public function revokeAdminCredits(int $tenantId, int $amount): void
+    {
+        if ($amount > $this->activeCredits($tenantId)) {
+            throw new \InvalidArgumentException('Créditos insuficientes en la sucursal seleccionada.');
+        }
+
+        $remaining = $amount;
+
+        $this->credits()
+            ->where('tenant_id', $tenantId)
+            ->where('balance', '>', 0)
+            ->where('expires_at', '>', now())
+            ->orderBy('expires_at')
+            ->orderBy('id')
+            ->get()
+            ->each(function (UserCredit $credit) use (&$remaining): void {
+                if ($remaining <= 0) {
+                    return;
+                }
+
+                $deduct = min($credit->balance, $remaining);
+                $credit->decrement('balance', $deduct);
+                $remaining -= $deduct;
+            });
     }
 
     /**

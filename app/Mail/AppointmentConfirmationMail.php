@@ -44,42 +44,11 @@ class AppointmentConfirmationMail extends Mailable
      */
     public function content(): Content
     {
-        $methodLabel = match ($this->appointment->payment_method) {
-            'transfer' => 'Transferencia bancaria',
-            'cash' => 'Efectivo',
-            'cash_at_arrival' => 'Efectivo al llegar',
-            'stripe' => 'Tarjeta (Stripe)',
-            'credit_balance' => 'Credito de paquete',
-            default => 'No especificado',
-        };
-
-        $originLabel = match ($this->appointment->booking_origin) {
-            'approved_credit_request' => 'Solicitud de credito aprobada',
-            'stripe_checkout_pending_appointment' => 'Compra de creditos en linea (Stripe)',
-            'landing_pending_booking' => 'Reserva desde landing con credito activo',
-            'client_weekly_calendar' => 'Calendario semanal del cliente',
-            'client_panel' => 'Panel del cliente',
-            'admin_panel' => 'Panel administrativo',
-            default => 'No especificado',
-        };
-
-        $creditRequest = $this->appointment->creditPurchaseRequest;
-
         return new Content(
-            markdown: 'emails.appointments.confirmation',
-            with: [
-                'methodLabel' => $methodLabel,
-                'originLabel' => $originLabel,
-                'creditRequest' => $creditRequest,
-            ],
+            view: 'emails.appointments.confirmation',
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, Attachment>
-     */
     public function attachments(): array
     {
         return [];

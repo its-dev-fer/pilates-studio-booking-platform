@@ -230,6 +230,19 @@ class CreditPurchaseRequestsTable
                             ]);
                         });
 
+                        $record->refresh();
+
+                        if ($record->status === CreditPurchaseRequest::STATUS_APPROVED) {
+                            $tenantId = (int) ($record->requested_tenant_id ?? $record->user->tenants()->value('tenants.id') ?? 1);
+                            $source = match ($record->payment_method) {
+                                CreditPurchaseRequest::METHOD_TRANSFER => 'transfer_purchase',
+                                CreditPurchaseRequest::METHOD_CASH => 'cash_purchase',
+                                default => 'manual_purchase',
+                            };
+
+                            $record->user->fresh()->sendCreditsAssignedNotification($source, [$tenantId]);
+                        }
+
                         Notification::make()
                             ->title('Solicitud procesada')
                             ->body($outcomeMessage)

@@ -44,7 +44,7 @@
     };
 @endphp
 @include('emails.orders.partials.shell-open')
-@include('emails.orders.partials.brand-header', ['subtitle' => 'Actualización de tu pedido'])
+@include('emails.orders.partials.brand-header', ['subtitle' => 'Actualización de tu pedido', 'eyebrow' => 'Tienda'])
                 {{-- Mensaje según etapa --}}
                 <tr>
                     <td style="padding:28px 32px 12px;">

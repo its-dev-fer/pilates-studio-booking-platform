@@ -86,9 +86,10 @@ class CheckoutController extends Controller
         $package = CreditPackage::findOrFail($packageId);
 
         $alreadyPurchased = false;
+        $creditedTenantId = null;
 
         // Iniciar transacción de BD para asegurar la integridad
-        DB::transaction(function () use ($user, $package, &$alreadyPurchased) {
+        DB::transaction(function () use ($user, $package, &$alreadyPurchased, &$creditedTenantId) {
             if ($package->is_one_time_purchase) {
                 $purchase = CreditPackagePurchase::firstOrCreate([
                     'user_id' => $user->id,
@@ -108,6 +109,7 @@ class CheckoutController extends Controller
 
             $pendingAppointment = session('pending_appointment');
             $tenantId = $pendingAppointment ? $pendingAppointment['tenant_id'] : $user->tenants()->first()->id;
+            $creditedTenantId = (int) $tenantId;
 
             $userCredit = UserCredit::create([
                 'user_id' => $user->id,
@@ -146,6 +148,10 @@ class CheckoutController extends Controller
             return redirect()
                 ->route('checkout.credits')
                 ->with('error', 'Este paquete es de compra única y ya fue adquirido en tu cuenta.');
+        }
+
+        if ($creditedTenantId) {
+            $user->fresh()->sendCreditsAssignedNotification('stripe_purchase', [$creditedTenantId]);
         }
 
         // Redirigir al Panel de Clientes (App Panel de Filament)
