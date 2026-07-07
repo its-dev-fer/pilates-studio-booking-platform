@@ -15,7 +15,7 @@
             {{-- Botón de WhatsApp --}}
             <x-filament::button
                 tag="a"
-                href="https://wa.me/+529611465703?text=Hola,%20necesito%20soporte%20con%20el%20sistema%20Hannah%20Reforme"
+                href="https://wa.me/+529611003141?text=Hola,%20necesito%20soporte%20con%20el%20sistema%20Hannah%20Reforme"
                 target="_blank"
                 color="success"
                 icon="heroicon-o-chat-bubble-left-ellipsis"
@@ -26,7 +26,7 @@
             {{-- Botón de Llamada Telefónica --}}
             <x-filament::button
                 tag="a"
-                href="tel:+529611465703"
+                href="tel:+529611003141"
                 color="gray"
                 icon="heroicon-o-phone"
             >
